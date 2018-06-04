@@ -165,7 +165,7 @@ class Version_1_0(VersionAbstract):
 
                 mm.update_min_max()
 
-    def remove_accents(str, input_str):
+    def remove_accents(self, input_str):
         nfkd_form = unicodedata.normalize('NFKD', input_str)
         stripped = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
         return stripped

@@ -144,7 +144,6 @@ class AnalyzerRunner(QObject):
             return False
         else:
             return True
-        return True
 
     def is_brim_needed(self, scene):
         # detect small area on printing surface, it is need to generate brim

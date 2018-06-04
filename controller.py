@@ -288,7 +288,6 @@ class Controller(QObject):
             return True
         else:
             return False
-        return False
 
     def set_unset_single_material_mode(self):
         if not self.is_multimaterial():

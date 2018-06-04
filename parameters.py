@@ -179,7 +179,6 @@ class PrintingParameters(object):
                     return None
             else:
                 return None
-        return None
 
     def get_actual_settings(self, printer_name, printer_variation, material_names, quality_settings, slicer):
         if len(material_names) > 1:
@@ -546,8 +545,6 @@ class AppParameters(object):
             version = printers_data['info']['version']
             return [version, materials_files_list]
 
-        return None
-
     def get_materials_info(self, json_path):
         try:
             with open(json_path, 'r') as in_file:
@@ -581,7 +578,6 @@ class AppParameters(object):
         except IndexError as e:
             return False
 
-        return False
 
     def make_full_os_path(self, file):
         return os.path.expanduser(file)

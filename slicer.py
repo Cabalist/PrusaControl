@@ -172,7 +172,6 @@ class Slic3rEngineRunner(QObject):
             return "0"
         else:
             return "0"
-        return "0"
 
     def support3_transform(self, in_value):
         print("Support transform 3: " + str(in_value))
@@ -182,7 +181,6 @@ class Slic3rEngineRunner(QObject):
             return "1"
         else:
             return "1"
-        return "0"
 
     def support4_transform(self, in_value):
         print("Support transform 4: " + str(in_value))

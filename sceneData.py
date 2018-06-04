@@ -1,44 +1,35 @@
 # -*- coding: utf-8 -*-
+import gc
+import itertools
+import logging
+import math
+import time
+from abc import ABCMeta, abstractmethod
+from collections import namedtuple
+from copy import deepcopy
+from os.path import basename
+
+import OpenGL
+import numpy as np
 import stl
+from OpenGL.GL import GL_BACK, GL_BLEND, GL_COMPILE, GL_CULL_FACE, \
+    GL_DEPTH_TEST, GL_EYE_PLANE, GL_LIGHTING, GL_NORMAL_ARRAY, \
+    GL_OBJECT_LINEAR, GL_OBJECT_PLANE, GL_ONE_MINUS_SRC_ALPHA, \
+    GL_POINTS, GL_S, GL_SRC_ALPHA, GL_T, GL_TEXTURE_2D, GL_TEXTURE_GEN_MODE, \
+    GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TRIANGLES, GL_VERTEX_ARRAY, \
+    glBegin, glBindTexture, glBlendFunc, glColor3f, glColor3ub, glColor3ubv, \
+    glColor4f, glColor4ub, glColor4ubv, glCullFace, glDisable, \
+    glDisableClientState, glDrawArrays, glEnable, glEnableClientState, glEnd, \
+    glEndList, glGenLists, glMultMatrixf, glNewList, glNormalPointerf, \
+    glPointSize, glPopMatrix, glPushMatrix, glTexGenfv, glTexGeni, \
+    glTranslatef, glVertex3f, glVertexPointerf
+from pyrr import geometric_tests, line, plane, ray
+from stl.mesh import Mesh
 
 __author__ = 'Tibor Vavra'
 
-import logging
-from collections import defaultdict
-
-import gc
-import numpy as np
-from abc import ABCMeta, abstractmethod
-from os.path import basename
-
-import time
-from PyQt4.QtCore import QObject
-from PyQt4.QtGui import QFont
-from PyQt4.QtOpenGL import QGLBuffer
-#from stl import Mode
-from stl.mesh import Mesh
-
-from random import randint
-import math
-import itertools
-from pprint import pprint
-
-
-import OpenGL
-
 OpenGL.ERROR_CHECKING = False
 OpenGL.ERROR_LOGGING = False
-
-from OpenGL.GL import *
-#from OpenGL.GLU import *
-#from OpenGL.GLUT import *
-
-from copy import deepcopy
-from pyrr import matrix44, Vector3, geometric_tests, line, ray, plane, matrix33
-
-from collections import namedtuple
-
-#glutInit()
 
 def timing(f):
     def wrap(*args):

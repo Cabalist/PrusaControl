@@ -1,26 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import errno
 import json
 import logging
 import os
 import platform
 import shutil
 import tempfile
-import sys
+import time
+from configparser import ConfigParser, MissingSectionHeaderError
+from copy import deepcopy
+from shutil import Error, copyfile
 
-#from urllib.request import Request, urlopen
-#from urllib.error import URLError, HTTPError
 import certifi
 import urllib3
-
-from configparser import ConfigParser, RawConfigParser, MissingSectionHeaderError
-from copy import deepcopy
-from pprint import pprint
-
-import errno
-from shutil import copyfile, Error
-
-import time
 
 __author__ = 'Tibor Vavra'
 

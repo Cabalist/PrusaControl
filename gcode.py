@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Tibor Vavra'
-
-import time
-#from fastnumbers import fast_float
+import os
 from collections import defaultdict
 from copy import deepcopy
-from pprint import pprint
-import os
 
 import numpy as np
 from PyQt4.QtCore import QFile
@@ -15,6 +10,8 @@ from PyQt4.QtCore import QObject
 from PyQt4.QtCore import QTextStream
 from PyQt4.QtCore import QThread
 from PyQt4.QtCore import pyqtSignal
+
+__author__ = 'Tibor Vavra'
 
 
 DEBUG = False

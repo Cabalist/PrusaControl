@@ -1,33 +1,19 @@
 # -*- coding: utf-8 -*-
-from PyQt4.QtGui import QColor, QScrollArea, QLayout, QAction, QMenu, QLineEdit, QFormLayout
-from PyQt4.QtGui import QColorDialog
-from PyQt4.QtGui import QStandardItem
-
-__author__ = 'Tibor Vavra'
-
-import logging
-import math
-import os
+import time
 from copy import deepcopy
 
 import numpy as np
-import time
-#from OpenGL.GL import *
-from PyQt4.QtCore import QFileInfo
-from PyQt4.QtCore import QPropertyAnimation
-from PyQt4.QtCore import QTextCodec
+from PyQt4.QtCore import QEvent, QFileInfo, QPropertyAnimation, QSettings, Qt
+from PyQt4.QtGui import QAction, QApplication, QCheckBox, QColor, QColorDialog,\
+    QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFileDialog, QFont,\
+    QFontDatabase, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout, QLabel, \
+    QLineEdit, QMainWindow, QMenu, QMessageBox, QPainter, QPainterPath, QPen, \
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSlider, QSpacerItem, \
+    QSpinBox, QStandardItem, QStyleFactory, QStyleOptionSlider, QVBoxLayout, QWidget
 
-from PyQt4.QtCore import Qt, SIGNAL, QSettings, QFile, QIODevice, QVariant, QEvent
-from PyQt4.QtGui import QFont, QFontDatabase, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QMainWindow, \
-QMessageBox, QProgressBar, QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget, \
-QPainter, QPainterPath, QPen, QSlider, QStyleOptionSlider, QDialog, QDialogButtonBox, \
-QComboBox, QCheckBox, QApplication, QSpinBox, QDoubleSpinBox, QFileDialog, QStyleFactory, \
-QScrollArea
-
-from PyQt4.QtOpenGL import QGLWidget
-
-import projectFile
 import sceneRender
+
+__author__ = 'Tibor Vavra'
 
 def timing(f):
     def wrap(*args):

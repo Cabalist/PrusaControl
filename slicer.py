@@ -1,24 +1,17 @@
 # -*- coding: utf-8 -*-
-
-__author__ = 'Tibor Vavra'
-
+import configparser
 import io
 import logging
-import os
-import configparser
+import platform
+import signal
+import subprocess
 from abc import ABCMeta, abstractmethod
 
-
-import platform
-import subprocess
-from copy import deepcopy
-
-from io import StringIO
-
-import signal
 from PyQt4.QtCore import QObject, QThread, pyqtSignal
 
 from gcode import GCode
+
+__author__ = 'Tibor Vavra'
 
 
 class SlicerEngineAbstract():

@@ -1,40 +1,41 @@
 # -*- coding: utf-8 -*-
+import time
+from copy import deepcopy
+
+import OpenGL
+import numpy
+import numpy as np
+from OpenGL.GL import GL_AMBIENT, GL_BLEND, GL_COLOR_BUFFER_BIT, \
+    GL_COLOR_MATERIAL, GL_COMPILE, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, \
+    GL_DIFFUSE, GL_FLAT, GL_FRONT, GL_FRONT_AND_BACK, GL_LEQUAL, GL_LIGHT0, \
+    GL_LIGHT1, GL_LIGHTING, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINES, \
+    GL_LINE_LOOP, GL_LINE_SMOOTH, GL_LINE_SMOOTH_HINT, GL_MODELVIEW, \
+    GL_MODELVIEW_MATRIX, GL_MULTISAMPLE, GL_NEAREST, GL_NICEST, GL_NORMALIZE, \
+    GL_ONE_MINUS_SRC_ALPHA, GL_PERSPECTIVE_CORRECTION_HINT, GL_POSITION, \
+    GL_PROJECTION, GL_PROJECTION_MATRIX, GL_QUADS, GL_REPEAT, GL_RGB, \
+    GL_RGBA, GL_SRC_ALPHA, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, \
+    GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_TRIANGLES, \
+    GL_UNPACK_ALIGNMENT, GL_UNSIGNED_BYTE, GL_VIEWPORT, GLfloat, glBegin, \
+    glBindTexture, glBlendFunc, glCallList, glClear, glClearColor, glClearDepth, \
+    glColor3f, glColor3ub, glColor3ubv, glColor4f, glColorMaterial, glCullFace, \
+    glDepthFunc, glDisable, glEnable, glEnd, glEndList, glFlush, glGenLists, \
+    glGenTextures, glGenerateMipmap, glGetDoublev, glGetIntegerv, glHint, \
+    glLightfv, glLineWidth, glLoadIdentity, glMatrixMode, glNewList, glNormal3f, \
+    glOrtho, glPixelStorei, glPopMatrix, glPushMatrix, glReadPixels, glRotated, \
+    glShadeModel, glTexCoord2f, glTexImage2D, glTexParameterf, glTexParameteri, \
+    glTranslatef, glVertex3d, glVertex3f, glViewport
+from OpenGL.GLU import gluPerspective, gluUnProject
+from PIL import Image
+from PyQt4 import QtCore
+from PyQt4.QtOpenGL import QGLContext, QGLFormat, QGLShader, QGLShaderProgram, QGLWidget
+
+from glButton import GlButton
+from sceneData import ModelTypeObj, MultiModel
 
 __author__ = 'Tibor Vavra'
 
-#import inspect
-#import logging
-from copy import deepcopy
-from pprint import pprint
-
-import OpenGL
-import numpy as np
-
-from sceneData import ModelTypeStl, ModelTypeObj, MultiModel
-
 OpenGL.ERROR_CHECKING = False
 OpenGL.ERROR_LOGGING = False
-
-from OpenGL.GL import *
-from OpenGL.GLU import *
-
-import math
-
-import numpy
-import time
-
-#from PyQt4.QtCore import QTimer
-#from PyQt4.QtGui import QColor, QCursor
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtOpenGL import *
-from PyQt4 import QtCore
-
-from PIL.Image import *
-
-import controller
-#from camera import TargetedCamera
-from glButton import GlButton
 
 #Mesure
 def timing(f):
@@ -247,8 +248,8 @@ class GLWidget(QGLWidget):
     def texture_from_png(self, filename, gen_mipmap=True):
         mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
 
-        img = open(filename)
-        img = img.transpose(FLIP_TOP_BOTTOM)
+        img = Image.open(filename)
+        img = img.transpose(Image.FLIP_TOP_BOTTOM)
         bpp = mode_to_bpp[img.mode]
         if bpp == 32:
             type = GL_RGBA

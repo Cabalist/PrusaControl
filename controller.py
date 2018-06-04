@@ -1,27 +1,18 @@
 # -*- coding: utf-8 -*-
-#import json
-import json
 import logging
-
-#import functools
-
-
 import time
 import webbrowser
-#from pprint import pprint
 from configparser import RawConfigParser
-from pprint import pprint
-
-from shutil import copyfile, Error
+from copy import deepcopy
+from itertools import compress
+from shutil import Error
 
 import numpy
-#import pyrr
 import urllib3
 from PyQt4.QtCore import QObject
-from PyQt4.QtCore import QTranslator, Qt, QPoint
-#from PyQt4 import QtGui
+from PyQt4.QtCore import QPoint, QTranslator, Qt
 from PyQt4.QtGui import QApplication
-from zeroconf import Zeroconf, ServiceBrowser, ServiceInfo
+from zeroconf import ServiceBrowser, ServiceInfo, Zeroconf
 
 import sceneData
 from analyzer import Analyzer
@@ -30,18 +21,6 @@ from gui import PrusaControlView, QMessageBox
 from parameters import AppParameters, PrintingParameters
 from projectFile import ProjectFile
 from sceneData import AppScene, ModelTypeStl
-#from sceneRender import GLWidget
-from copy import deepcopy
-
-from itertools import compress
-
-
-#import xml.etree.cElementTree as ET
-#from zipfile import ZipFile
-
-#from PyQt4 import QtCore, QtGui
-
-#Mesure
 from slicer import SlicerEngineManager
 
 __author__ = 'Tibor Vavra'

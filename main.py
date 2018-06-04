@@ -1,23 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import atexit
-#import inspect
-#from msilib.schema import File
+import cProfile
+import logging
+import os
+import platform
+import sys
 
-#from PyQt4.QtGui import QApplication, QIcon
-#from PyQt4.QtCore import QCoreApplication
+from PyQt4.QtCore import QCoreApplication, QFile, QIODevice, QObject, QThread, pyqtSignal, Qt
+from PyQt4.QtGui import QApplication, QIcon, QLabel, QPixmap, QProgressBar, QSplashScreen, QStyleFactory
 
 from controller import Controller
 from parameters import AppParameters
-from sceneRender import *
-#from sceneData import *
-import logging
-import cProfile
-import os
-import platform
-#import shutil
-
-
 __author__ = 'Tibor Vavra'
 
 DEBUG = False
@@ -99,7 +93,7 @@ def log_exception(excType, excValue, traceback):
 
 
 def main():
-    QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
+    QCoreApplication.setAttribute(Qt.AA_X11InitThreads, True)
     if getattr(sys, 'frozen', False):
         # it is freeze app
         base_dir = sys._MEIPASS

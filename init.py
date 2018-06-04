@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import vcversioner
 
 __author__ = 'Tibor Vavra'
-
-import vcversioner
 
 version = vcversioner.find_version(root='.', version_file='%(root)s/data/v.txt').version
 version_lst = version.split('.')

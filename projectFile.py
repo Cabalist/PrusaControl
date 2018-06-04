@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
-from pprint import pprint
-from xml.dom import minidom
-
-import unicodedata
-
-__author__ = 'Tibor Vavra'
-
 import ast
 import logging
-from abc import ABCMeta, abstractmethod
-from io import StringIO
-from zipfile import ZipFile, ZIP_DEFLATED
-import xml.etree.cElementTree as ET
 import os
-#import io
+import unicodedata
+import xml.etree.cElementTree as ET
+from abc import ABCMeta, abstractmethod
+from copy import deepcopy
+from xml.dom import minidom
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import numpy
-from io import BytesIO
 import stl
-
 from stl.mesh import Mesh
 
 from sceneData import ModelTypeStl, MultiModel
+
+__author__ = 'Tibor Vavra'
 
 fileExtension = 'prusa'
 

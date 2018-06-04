@@ -29,7 +29,7 @@ class EventLoopRunner(QObject):
         self.system_platform = platform.system()
         self.progressbar_on = 0
 
-        with __builtins__.open(self.base_path + "data/v.txt", 'r') as version_file:
+        with open(os.path.join(self.base_path, "data", "v.txt")) as version_file:
             self.version_full = version_file.read()
             self.version = AppParameters.strip_version_string(self.version_full)
 

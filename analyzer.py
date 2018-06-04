@@ -24,7 +24,7 @@ class Analyzer(object):
             self.cancel_analyz()
 
         print("start new analyze")
-        #self.analyzer_runner.whole_scene = whole_scene
+        # self.analyzer_runner.whole_scene = whole_scene
         self.analyzer_runner.moveToThread(self.analyzer_runner_thread)
         self.analyzer_runner_thread.started.connect(self.analyzer_runner.start_analyze)
 
@@ -34,7 +34,6 @@ class Analyzer(object):
         self.analyzer_runner.is_running = True
         self.analyzer_runner_thread.start()
 
-
     def cancel_analyz(self):
         self.analyzer_runner.is_running = False
         self.analyzer_runner_thread.quit()
@@ -42,7 +41,6 @@ class Analyzer(object):
 
         self.analyzer_runner_thread = QThread()
         self.analyzer_runner = AnalyzerRunner(self.controller)
-
 
     def set_finished_read(self):
         print("analyze done")
@@ -53,8 +51,6 @@ class Analyzer(object):
         print(result)
         if self.send_result_function:
             self.send_result_function(result)
-
-
 
     '''
     def make_analyze(self, whole_scene):
@@ -139,7 +135,6 @@ class AnalyzerRunner(QObject):
 
         self.finished.emit()
 
-
     def is_support_needed(self, scene):
         # detect angles between normal vector of face and normal of printing surface
         # angel bigger than something is problem
@@ -155,9 +150,3 @@ class AnalyzerRunner(QObject):
         # detect small area on printing surface, it is need to generate brim
         # something returned? problematic printing without brim, recommended to turn it on
         return self.controller.scene.get_contact_faces_with_area_smaller_than(2., scene)
-
-
-
-
-
-

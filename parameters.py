@@ -18,19 +18,20 @@ import urllib3
 __author__ = 'Tibor Vavra'
 
 
-#Mesure
+# Mesure
 def timing(f):
     def wrap(*args):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        print('%s function took %0.3f ms' % (f.func_name, (time2-time1)*1000.0))
+        print('%s function took %0.3f ms' % (f.func_name, (time2 - time1) * 1000.0))
         return ret
+
     return wrap
 
 
 class PrintingParameters(object):
-    def __init__(self, app_config, controller= None):
+    def __init__(self, app_config, controller=None):
         self.application_parameters = app_config
         self.controller = controller
 
@@ -40,46 +41,45 @@ class PrintingParameters(object):
         self.printers_parameters = {}
         self.materials_quality_parameters = {}
 
-        #read printers json file
-        #print(self.application_parameters.printers_parameters_file)
+        # read printers json file
+        # print(self.application_parameters.printers_parameters_file)
         self.all_printers_parameters = self.read_printers_parameters(self.application_parameters.printers_parameters_file)['printers']
 
-        #apply default printer type settings
-        #print("Printer type before:")
-        #pprint(self.all_printers_parameters['default']['printer_type'])
+        # apply default printer type settings
+        # print("Printer type before:")
+        # pprint(self.all_printers_parameters['default']['printer_type'])
         out = dict(self.apply_default_parameters(self.all_printers_parameters['default']['printer_type']))
         self.all_printers_parameters['default']['printer_type'] = out
-        #apply default printer settings
+        # apply default printer settings
         self.printers_parameters = self.apply_default_parameters(self.all_printers_parameters)
 
-        #read all material configuration files for every printer
+        # read all material configuration files for every printer
         for printer in self.get_printers_names():
             self.all_materials_quality_parameters[printer] = self.read_material_quality_parameters_for_printer(
-                                                        self.application_parameters.user_folder + self.printers_parameters[printer]['material_parameters_file'])['materials']
-        #apply default materials and default quality
+                    self.application_parameters.user_folder + self.printers_parameters[printer]['material_parameters_file'])['materials']
+        # apply default materials and default quality
         for printer in self.all_materials_quality_parameters:
             self.materials_quality_parameters[printer] = self.apply_default_material_parameters(
-                                                        self.all_materials_quality_parameters[printer])
+                    self.all_materials_quality_parameters[printer])
 
-            #apply default material quality on other quality
+            # apply default material quality on other quality
             for material in self.materials_quality_parameters[printer]:
                 self.materials_quality_parameters[printer][material]["quality"] = self.apply_default_quality_parameters(
-                                                    self.materials_quality_parameters[printer][material]["quality"])
+                        self.materials_quality_parameters[printer][material]["quality"])
 
-            #print("Material list without defaults quality: ")
-            #pprint(self.materials_quality_parameters[printer])
+            # print("Material list without defaults quality: ")
+            # pprint(self.materials_quality_parameters[printer])
 
-            #merge printers dict with materials dict to one super list with all parameters
+            # merge printers dict with materials dict to one super list with all parameters
             self.printers_parameters[printer]['materials'] = self.materials_quality_parameters[printer]
 
-            #print("Material list without default: ")
-            #pprint(self.materials_quality_parameters[printer])
-
+            # print("Material list without default: ")
+            # pprint(self.materials_quality_parameters[printer])
 
     def get_printers_names(self, only_visible=False):
         printers = self.printers_parameters
         if only_visible and 'visible' in printers[list(printers.keys())[0]]:
-            unsorted =  [[printer, printers[printer]['sort']] for printer in printers if printers[printer]['visible'] == 1]
+            unsorted = [[printer, printers[printer]['sort']] for printer in printers if printers[printer]['visible'] == 1]
             sort_list = sorted(unsorted, key=lambda mem: mem[1])
             return [a[0] for a in sort_list]
         else:
@@ -125,7 +125,6 @@ class PrintingParameters(object):
 
         return return_dict
 
-
     def apply_default_quality_parameters(self, dict_with_default):
         return_dict = {}
         for i in dict_with_default:
@@ -158,7 +157,6 @@ class PrintingParameters(object):
 
         return return_dict
 
-
     def get_actual_settings_for_one_material(self, printer_name, printer_variation, material_name, quality_seting):
         if not printer_name or not printer_variation or not material_name or not quality_seting:
             return None
@@ -185,41 +183,40 @@ class PrintingParameters(object):
 
     def get_actual_settings(self, printer_name, printer_variation, material_names, quality_settings, slicer):
         if len(material_names) > 1:
-            #print("Multi material version")
+            # print("Multi material version")
             # multimaterial version
             settings_lst = []
             for mat in material_names:
                 settings_lst.append(self.get_actual_settings_for_one_material(printer_name, printer_variation, mat, quality_settings))
 
-            multimaterial_settings =  self.connect_different_settings(slicer.multimaterial_spec_parameters, settings_lst)
-            #print("Material settings:")
-            #pprint(multimaterial_settings)
+            multimaterial_settings = self.connect_different_settings(slicer.multimaterial_spec_parameters, settings_lst)
+            # print("Material settings:")
+            # pprint(multimaterial_settings)
 
             if self.controller:
                 if self.controller.soluble_extruder > -1:
                     # detect if soluble material is used
                     # if yes use it for update multimaterial_settings
-                    #soluble_material_settings = self.controller.get_printing_settings_for_material_in_extruder(self.controller.soluble_extruder)
-                    soluble_material_settings = self.get_actual_settings_for_one_material(printer_name, printer_variation, material_names[self.controller.soluble_extruder-1], quality_settings)
-                    #print("Soluble material settings:")
-                    #pprint(soluble_material_settings)
+                    # soluble_material_settings = self.controller.get_printing_settings_for_material_in_extruder(self.controller.soluble_extruder)
+                    soluble_material_settings = self.get_actual_settings_for_one_material(printer_name, printer_variation, material_names[self.controller.soluble_extruder - 1], quality_settings)
+                    # print("Soluble material settings:")
+                    # pprint(soluble_material_settings)
 
-                    #soluble_material_settings_shorted = {key:soluble_material_settings[key] for key in slicer.support_parameters if key in soluble_material_settings}
-                    soluble_material_settings_shorted = {key:soluble_material_settings[key] for key in slicer.support_parameters}
+                    # soluble_material_settings_shorted = {key:soluble_material_settings[key] for key in slicer.support_parameters if key in soluble_material_settings}
+                    soluble_material_settings_shorted = {key: soluble_material_settings[key] for key in slicer.support_parameters}
                     multimaterial_settings_change = deepcopy(multimaterial_settings)
                     multimaterial_settings_change.update(soluble_material_settings_shorted)
                     return multimaterial_settings_change
                 else:
-                    #normal materials
+                    # normal materials
                     return multimaterial_settings
 
             return multimaterial_settings
         else:
-            #print("Single material version")
-            #print("Printing settings: %s %s %s %s" % (str(printer_name), str(printer_variation), str(material_names[0]), str(quality_settings)))
+            # print("Single material version")
+            # print("Printing settings: %s %s %s %s" % (str(printer_name), str(printer_variation), str(material_names[0]), str(quality_settings)))
             # one material version
             return self.get_actual_settings_for_one_material(printer_name, printer_variation, material_names[0], quality_settings)
-
 
     def connect_different_settings(self, keys_lst, lst):
         out = dict()
@@ -232,14 +229,11 @@ class PrintingParameters(object):
 
         return out
 
-
     def read_printers_parameters(self, filename):
         printers = {}
         with open(filename, 'rb') as json_file:
             printers = json.loads(json_file.read().decode('utf8'))
         return printers
-
-
 
     def read_material_quality_parameters_for_printer(self, printer_config_file):
         if not printer_config_file:
@@ -251,8 +245,6 @@ class PrintingParameters(object):
             material_config = json.loads(text)
 
         return material_config
-
-
 
 
 class AppParameters(object):
@@ -273,7 +265,7 @@ class AppParameters(object):
             self.version = self.strip_version_string(self.version_full)
 
         self.json_settings_url = "https://raw.githubusercontent.com/prusa3d/PrusaControl-settings/master/"
-        #self.json_settings_url = "https://raw.githubusercontent.com/tibor-vavra/PrusaControl-settings/master/"
+        # self.json_settings_url = "https://raw.githubusercontent.com/tibor-vavra/PrusaControl-settings/master/"
 
         self.printers_filename = "printers.json"
 
@@ -288,8 +280,6 @@ class AppParameters(object):
 
         self.prusacontrol_help_page = "http://www.prusa3d.com"
         self.prusa_eshop_page = "http://shop.prusa3d.com"
-
-
 
         if self.system_platform in ['Linux']:
             self.tmp_place = tempfile.gettempdir() + '/'
@@ -313,12 +303,12 @@ class AppParameters(object):
 
             self.config_path = os.path.expanduser("~\\prusacontrol.cfg")
             self.user_folder = os.path.expanduser("~\\.prusacontrol\\")
-            #self.user_folder = self.tmp_place.split("\\appdata")[0] + "\\.prusacontrol\\"
+            # self.user_folder = self.tmp_place.split("\\appdata")[0] + "\\.prusacontrol\\"
 
             self.default_printers_parameters_file = os.path.expanduser(self.data_folder + self.printers_filename)
             self.printers_parameters_file = self.user_folder + self.printers_filename
             self.config.readfp(open('data\\defaults.cfg'))
-            #print("Executable: " + sys.executable)
+            # print("Executable: " + sys.executable)
         else:
             self.data_folder = self.local_path + "data/"
             self.tmp_place = './'
@@ -328,18 +318,16 @@ class AppParameters(object):
             self.printers_parameters_file = self.user_folder + self.printers_filename
             self.config.readfp(open(self.local_path + 'data/defaults.cfg'))
 
-        #print(self.user_folder)
-        #print(self.tmp_place)
-        #print(self.default_printers_parameters_file)
-        #print(self.printers_parameters_file)
-        #print(self.config_path)
-
+        # print(self.user_folder)
+        # print(self.tmp_place)
+        # print(self.default_printers_parameters_file)
+        # print(self.printers_parameters_file)
+        # print(self.config_path)
 
         try:
             self.config.read(self.config_path)
         except MissingSectionHeaderError:
             logging.error("Config file is corrupted, using default one!")
-
 
         self.first_run()
 
@@ -352,9 +340,6 @@ class AppParameters(object):
         if is_internet_on and self.config.getboolean('settings', 'automatic_update_parameters'):
             if self.download_new_settings_files():
                 self.check_versions()
-
-
-
 
     @staticmethod
     def strip_version_string(string_in):
@@ -385,13 +370,12 @@ class AppParameters(object):
             logging.warning('Connection failed.')
             return False
 
-
     def first_run(self):
-        #check is there settings files in user folders
+        # check is there settings files in user folders
         printer_file_config = self.user_folder + self.printers_filename
         # if yes no first run
         if os.path.exists(printer_file_config):
-            #print("printers.json is existing ")
+            # print("printers.json is existing ")
             old_printers_res = self.get_printers_info(printer_file_config)
             default_printers_res = self.get_printers_info(self.data_folder + self.printers_filename)
             if old_printers_res and default_printers_res:
@@ -405,7 +389,7 @@ class AppParameters(object):
                 return
         # else copy from data folder to user folder
         else:
-            #print("printers.json is not existing, first run ")
+            # print("printers.json is not existing, first run ")
             try:
                 os.makedirs(self.user_folder)
             except OSError as exception:
@@ -430,11 +414,10 @@ class AppParameters(object):
                 except IOError as e:
                     logging.debug('Error: %s' % e.strerror)
 
-
-    #@timing
+    # @timing
     def download_new_settings_files(self):
         printers_data = {}
-        #req = Request(self.json_settings_url + self.printers_filename)
+        # req = Request(self.json_settings_url + self.printers_filename)
         try:
             r = self.http.request('GET', self.json_settings_url + self.printers_filename)
 
@@ -448,14 +431,14 @@ class AppParameters(object):
             return False
         else:
 
-            with open(self.tmp_place+self.printers_filename, 'wb') as out_file:
-                #shutil.copyfileobj(r, out_file)
+            with open(self.tmp_place + self.printers_filename, 'wb') as out_file:
+                # shutil.copyfileobj(r, out_file)
                 out_file.write(r.data)
 
-            with open(self.tmp_place+self.printers_filename, 'r') as in_file:
+            with open(self.tmp_place + self.printers_filename, 'r') as in_file:
                 printers_data = json.load(in_file)
                 materials_files_list = [printers_data['printers'][i]['material_parameters_file'] for i in
-                                    printers_data['printers'] if i not in ['default']]
+                                        printers_data['printers'] if i not in ['default']]
 
             if materials_files_list == []:
                 logging.error("No internet connection or different network problem")
@@ -463,16 +446,16 @@ class AppParameters(object):
 
             for i in materials_files_list:
                 r_mat = self.http.request('GET', self.json_settings_url + i)
-                with open(self.tmp_place+i, 'wb') as out_file:
+                with open(self.tmp_place + i, 'wb') as out_file:
                     out_file.write(r_mat.data)
         return True
 
     def check_versions(self):
         old = self.user_folder + self.printers_filename
         new = self.tmp_place + self.printers_filename
-        #print(old)
-        #print(new)
-        #out = self.get_actual_version(old, new)
+        # print(old)
+        # print(new)
+        # out = self.get_actual_version(old, new)
 
         res_old = self.get_printers_info(old)
         if res_old:
@@ -487,7 +470,7 @@ class AppParameters(object):
             return
 
         if new_version > old_version:
-            #print("nova verze printers-kopiruji")
+            # print("nova verze printers-kopiruji")
             copyfile(new, self.user_folder + self.printers_filename)
 
         for i in new_material_list:
@@ -503,14 +486,14 @@ class AppParameters(object):
                 self.use_default_files()
 
     def use_default_files(self):
-        #delete .prusacontrol
+        # delete .prusacontrol
         try:
             shutil.rmtree(self.user_folder)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
 
-        #copy default files from data folder
+        # copy default files from data folder
         try:
             os.makedirs(self.user_folder)
         except OSError as exception:
@@ -535,11 +518,10 @@ class AppParameters(object):
             except IOError as e:
                 logging.debug('Error: %s' % e.strerror)
 
-
     def check_new_version_of_prusacontrol(self):
-        #download json file with actual version
+        # download json file with actual version
         try:
-            #r = urlopen(self.prusacontrol_url + self.prusacontrol_version_file)
+            # r = urlopen(self.prusacontrol_url + self.prusacontrol_version_file)
             r = self.http.request('GET', self.prusacontrol_url + self.prusacontrol_version_file)
         except urllib3.exceptions.HTTPError as e:
             return None
@@ -554,7 +536,6 @@ class AppParameters(object):
                     self.is_version_actual = True
             else:
                 return None
-
 
     def get_printers_info(self, json_path):
         with open(json_path, 'r') as in_file:
@@ -577,13 +558,12 @@ class AppParameters(object):
 
         return None
 
-
     def is_higher(self, version_from_internet):
         splitted_version_from_internet = version_from_internet.split("_")
         splitted_local_version = self.version.split("_")
 
-        #print("Local version: " + str(splitted_local_version))
-        #print("Internet version: " + str(splitted_version_from_internet))
+        # print("Local version: " + str(splitted_local_version))
+        # print("Internet version: " + str(splitted_version_from_internet))
         try:
             version_from_internet_lst = splitted_version_from_internet[0].split(".")
             local_version_lst = splitted_local_version[0].split(".")
@@ -602,9 +582,6 @@ class AppParameters(object):
             return False
 
         return False
-
-
-
 
     def make_full_os_path(self, file):
         return os.path.expanduser(file)

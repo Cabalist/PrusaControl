@@ -13,8 +13,8 @@ from PyQt4.QtCore import pyqtSignal
 
 __author__ = 'Tibor Vavra'
 
-
 DEBUG = False
+
 
 class GCode(object):
 
@@ -34,10 +34,10 @@ class GCode(object):
 
         self.printing_time = 0.0
         self.filament_length = 0.0
-        #print("Filename type: " + str(type(filename)))
-        #print("Filename: " + filename)
-        #if type(filename)==:
-        #self.filename = u'c:\\models\\super mega testovací Jindřich šložka čěýáéůú\\anubis_PLA_OPTIMAL.gcode'
+        # print("Filename type: " + str(type(filename)))
+        # print("Filename: " + filename)
+        # if type(filename)==:
+        # self.filename = u'c:\\models\\super mega testovací Jindřich šložka čěýáéůú\\anubis_PLA_OPTIMAL.gcode'
         self.filename = filename
 
         self.is_loaded = False
@@ -62,7 +62,7 @@ class GCode(object):
             self.data = {}
             self.all_data = []
             self.data_keys = []
-        elif self.gcode_parser and self.gcode_parser.is_running==True:
+        elif self.gcode_parser and self.gcode_parser.is_running == True:
             self.gcode_parser.is_running = False
         self.controller.set_progress_bar(0)
 
@@ -84,8 +84,6 @@ class GCode(object):
 
         return lines_number
 
-
-
     def read_in_thread(self, update_progressbar_function, after_done_function):
         print("reading in thread")
         self.gcode_parser.moveToThread(self.gcode_parser_thread)
@@ -95,7 +93,7 @@ class GCode(object):
         self.gcode_parser_thread.started.connect(self.gcode_parser.load_gcode_file)
         # connect all signals to parser class
         self.gcode_parser.finished.connect(self.set_finished_read)
-        self.gcode_parser.update_progressbar=True
+        self.gcode_parser.update_progressbar = True
         self.gcode_parser.set_update_progress.connect(update_progressbar_function)
         self.gcode_parser.set_data_keys.connect(self.set_data_keys)
         self.gcode_parser.set_data.connect(self.set_data)
@@ -103,7 +101,6 @@ class GCode(object):
         self.gcode_parser.set_printing_time.connect(self.set_printig_time)
 
         self.gcode_parser_thread.start()
-
 
     def read_in_realtime(self, update_progressbar=False, progressbar_func=None):
         self.gcode_parser.set_data_keys.connect(self.set_data_keys)
@@ -119,7 +116,6 @@ class GCode(object):
             return True
         else:
             return False
-
 
     def set_printig_time(self, time):
         self.printing_time = time
@@ -137,16 +133,15 @@ class GCode(object):
         self.gcode_parser_thread.quit()
         self.is_loaded = True
         self.done_loading_callback()
-        #self.controller.set_gcode()
+        # self.controller.set_gcode()
 
     def set_finished_copy(self):
         self.gcode_copy_thread.quit()
-        #print(str(self.writing_done_callback))
+        # print(str(self.writing_done_callback))
         self.writing_done_callback()
 
     def set_color_change_data(self, data):
         self.color_change_data = data
-
 
     def write_with_changes_in_thread(self, filename_in, filename_out, update_function):
         self.gcode_copy.filename_in = filename_in
@@ -162,8 +157,6 @@ class GCode(object):
         self.gcode_copy_thread.start()
 
 
-
-
 class GcodeCopyRunner(QObject):
     finished = pyqtSignal()
     set_update_progress = pyqtSignal(int)
@@ -175,7 +168,6 @@ class GcodeCopyRunner(QObject):
         self.color_change_lst = color_change_lst
         self.is_running = True
 
-
     def write_file(self):
 
         if self.color_change_lst:
@@ -183,7 +175,7 @@ class GcodeCopyRunner(QObject):
         else:
             self.copy_file_with_progress(self.filename_in, self.filename_out)
 
-    def copy_file_with_progress_and_color_changes(self, filename_in, filename_out, length=16*1024):
+    def copy_file_with_progress_and_color_changes(self, filename_in, filename_out, length=16 * 1024):
         f_src = open(filename_in, 'r')
         f_dst = open(filename_out, 'w')
 
@@ -201,12 +193,11 @@ class GcodeCopyRunner(QObject):
                 f_dst.write("M600\n")
             f_dst.write(buf)
             copied += len(buf)
-            self.set_update_progress.emit((copied * 1. / fsrc_size * 1.)*100)
+            self.set_update_progress.emit((copied * 1. / fsrc_size * 1.) * 100)
 
-            #progress_callback((copied * 1. / fsrc_size * 1.))
+            # progress_callback((copied * 1. / fsrc_size * 1.))
 
-
-    def copy_file_with_progress(self, filename_in, filename_out, length=16*1024):
+    def copy_file_with_progress(self, filename_in, filename_out, length=16 * 1024):
         f_src = open(filename_in, 'r')
         f_dst = open(filename_out, 'w')
 
@@ -220,9 +211,8 @@ class GcodeCopyRunner(QObject):
                 break
             f_dst.write(buf)
             copied += len(buf)
-            self.set_update_progress.emit((copied * 1. / fsrc_size * 1.)*100)
-            #progress_callback((copied * 1. / fsrc_size * 1.))
-
+            self.set_update_progress.emit((copied * 1. / fsrc_size * 1.) * 100)
+            # progress_callback((copied * 1. / fsrc_size * 1.))
 
 
 class GcodeParserRunner(QObject):
@@ -233,13 +223,12 @@ class GcodeParserRunner(QObject):
     set_printing_time = pyqtSignal(float)
     set_update_progress = pyqtSignal(int)
 
-
     def __init__(self, controller, filename):
         super(GcodeParserRunner, self).__init__()
         self.is_running = True
         self.controller = controller
         self.filename = filename
-        self.update_progressbar=False
+        self.update_progressbar = False
 
         self.data = defaultdict(list)
         self.all_data = []
@@ -258,7 +247,6 @@ class GcodeParserRunner(QObject):
         self.printing_time = 0.0
         self.filament_length = 0.0
 
-
     def cancel_parsing(self):
         self.is_running = False
 
@@ -275,20 +263,20 @@ class GcodeParserRunner(QObject):
                 return False
 
             if self.update_progressbar:
-                if counter==10000:
-                    #in_stream.pos() je hodne pomala funkce takze na ni pozor!!!
-                    progress = (in_stream.pos()*1./file_size*1.) * 100.
+                if counter == 10000:
+                    # in_stream.pos() je hodne pomala funkce takze na ni pozor!!!
+                    progress = (in_stream.pos() * 1. / file_size * 1.) * 100.
                     self.set_update_progress.emit(int(progress))
-                    counter=0
+                    counter = 0
                 else:
-                    counter+=1
+                    counter += 1
 
             line = in_stream.readLine()
             bits = line.split(';', 1)
             bits_len = len(bits)
 
             if bits[0] == '':
-                line_number+=1
+                line_number += 1
                 if bits_len > 1:
                     if bits[0] == '' and bits[1] == "END gcode for filament":
                         break
@@ -333,18 +321,15 @@ class GcodeParserRunner(QObject):
             if layer_flag == 'M':
                 self.non_extruding_layers.append(i)
 
-
-
         for i in self.non_extruding_layers:
             self.data.pop(i, None)
 
-        #print("data after:")
-        #pprint(len(self.data))
+        # print("data after:")
+        # pprint(len(self.data))
 
         self.data_keys = set()
         self.data_keys = set(self.data)
         self.data_keys = sorted(self.data_keys, key=float)
-
 
         self.set_data_keys.emit(self.data_keys)
         self.set_data.emit(self.data)
@@ -354,27 +339,26 @@ class GcodeParserRunner(QObject):
         self.finished.emit()
         return True
 
-
     def calculate_time_of_print(self):
         time_of_print = 0.0
         all_data = self.all_data
         number_of_tool_change = len(self.tool_change_data)
 
-        #vectorization speed up
+        # vectorization speed up
         a_vect = np.array([i[0] for i in all_data])
         b_vect = np.array([i[1] for i in all_data])
         speed_vect = np.array([i[3] for i in all_data])
 
         vect_vect = b_vect - a_vect
-        #print("vect_vect: " + str(vect_vect.tolist()))
+        # print("vect_vect: " + str(vect_vect.tolist()))
         leng_vect = np.linalg.norm(vect_vect, axis=1)
-        #print("leng_vect: " + str(leng_vect.tolist()))
+        # print("leng_vect: " + str(leng_vect.tolist()))
         time_vect = np.divide(leng_vect, speed_vect)
         time_of_print = np.sum(time_vect)
 
         print("Time of print0: " + str(time_of_print))
 
-        #Magic constant :-)
+        # Magic constant :-)
         time_of_print *= 1.1
         print("Time of print1: " + str(time_of_print))
 
@@ -382,30 +366,30 @@ class GcodeParserRunner(QObject):
         print("Sum of sleep: " + str(sum_of_sleep))
         time_of_print += sum_of_sleep
 
-        print("Time of print2: " +str(time_of_print))
+        print("Time of print2: " + str(time_of_print))
 
-        #speed is in mm/min => mm/sec
-        return time_of_print*60.
+        # speed is in mm/min => mm/sec
+        return time_of_print * 60.
 
     def calculate_length_of_filament(self):
         length = 0.0
         for line in self.all_data:
-            if line[2]=='M':
+            if line[2] == 'M':
                 continue
             a = np.array(line[0])
             b = np.array(line[1])
-            vect = b-a
+            vect = b - a
             leng = np.linalg.norm(vect)
-            length+=leng
+            length += leng
 
         return length
 
     def set_print_info_text(self, string):
         print("Info: " + string)
 
-    #only T lines
+    # only T lines
     def parse_t_line(self, data, line_number):
-        if len(data)>1:
+        if len(data) > 1:
             text = data[0]
             comment = data[1]
         else:
@@ -425,10 +409,9 @@ class GcodeParserRunner(QObject):
             self.tool_change_data.append(int(line[0][1:]))
             self.actual_tool = int(line[0][1:])
 
-
-    #only G4 lines
+    # only G4 lines
     def parse_g4_line(self, data, line_number):
-        if len(data)>1:
+        if len(data) > 1:
             text = data[0]
             comment = data[1]
         else:
@@ -445,9 +428,7 @@ class GcodeParserRunner(QObject):
         if line_len > 1:
             if 'S' in line[1]:
                 self.sleep_data.append(float(line[1][1:]))
-                #set sleep
-
-
+                # set sleep
 
     '''
     #only G1 lines
@@ -714,10 +695,11 @@ class GcodeParserRunner(QObject):
 
         return
     '''
+
     @staticmethod
     def type_convert(type):
         if type == 0.0:
-            type_out = "M"  #Move type
+            type_out = "M"  # Move type
 
         elif type == 1.0:
             type_out = "E"  # Extrusion type
@@ -744,7 +726,7 @@ class GcodeParserRunner(QObject):
         # data is list from line from file devided by ;
         # [0] data and [1] is comment
 
-        if len(data)>1:
+        if len(data) > 1:
             text = data[0]
             comment = data[1]
         else:
@@ -755,7 +737,7 @@ class GcodeParserRunner(QObject):
         line = list(filter(None, line))
         line_len = len(line)
 
-        #print(comment)
+        # print(comment)
         comment_line = comment.split(' ')
         comment_line = list(filter(None, comment_line))
         comment_line_len = len(comment_line)
@@ -807,7 +789,7 @@ class GcodeParserRunner(QObject):
                     # G1 X121.899 Y107.591 E-0.97707 ; wipe and retract
                     self.extrusion = np.float(line[3][1:])
                     self.actual_point = np.array(
-                        [np.float(line[1][1:]), np.float(line[2][1:]), np.float(self.actual_z)])
+                            [np.float(line[1][1:]), np.float(line[2][1:]), np.float(self.actual_z)])
                 elif 'F' in line[3]:
                     # G1 X119.731 Y110.014 F7200.000 ; move to first perimeter point
                     self.speed = np.float(line[3][1:])
@@ -824,7 +806,6 @@ class GcodeParserRunner(QObject):
                     self.speed = np.float(line[2][1:])
 
                 self.actual_point = np.array([np.float(line[1][1:]), self.actual_point[1], self.actual_point[2]])
-
 
             if self.extrusion > 0.:
                 if comment_line_len > 0:
@@ -890,13 +871,12 @@ class GcodeParserRunner(QObject):
 
         return
 
-
     def parse_g92_line(self, data, line_number):
         # get raw line data and line_number to know position in file
         # data is list from line from file devided by ;
         # [0] data and [1] is comment
 
-        if len(data)>1:
+        if len(data) > 1:
             text = data[0]
             comment = data[1]
         else:
@@ -907,7 +887,7 @@ class GcodeParserRunner(QObject):
         line = list(filter(None, line))
         line_len = len(line)
 
-        #print(comment)
+        # print(comment)
         comment_line = comment.split(' ')
         comment_line = list(filter(None, comment_line))
         comment_line_len = len(comment_line)
@@ -915,13 +895,10 @@ class GcodeParserRunner(QObject):
         if 'E' in line[1]:
             self.extrusion = np.float(line[1][1:])
 
-
-
-
-    def add_line(self, first_point, second_point, actual_z, type, speed=0., extrusion=0., extruder=0, line_number = -1):
-        #print("Add line: " + str(first_point) + ' ' + str(second_point) + ' type: ' + str(type) + ' ' + str(line_number))
-        #print("actual data:")
-        #print(self.data_keys)
+    def add_line(self, first_point, second_point, actual_z, type, speed=0., extrusion=0., extruder=0, line_number=-1):
+        # print("Add line: " + str(first_point) + ' ' + str(second_point) + ' type: ' + str(type) + ' ' + str(line_number))
+        # print("actual data:")
+        # print(self.data_keys)
 
         key = deepcopy(actual_z)
         '''
@@ -963,21 +940,19 @@ class GcodeParserRunner(QObject):
             self.data[key] = []
 
         self.data[key].append(np.array([first_point,
-                               second_point,
-                               type,
-                               speed,
-                               extrusion,
-                               extruder,
-                               line_number]))
+                                        second_point,
+                                        type,
+                                        speed,
+                                        extrusion,
+                                        extruder,
+                                        line_number]))
         self.all_data.append(np.array([first_point,
-                              second_point,
-                              type,
-                              speed,
-                              extrusion,
-                              extruder,
-                              line_number]))
-
-
+                                       second_point,
+                                       type,
+                                       speed,
+                                       extrusion,
+                                       extruder,
+                                       line_number]))
 
     '''
     def add_point(self, x, y, z, actual_z):

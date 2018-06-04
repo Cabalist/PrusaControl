@@ -25,13 +25,15 @@ from slicer import SlicerEngineManager
 
 __author__ = 'Tibor Vavra'
 
+
 def timing(f):
     def wrap(*args):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        logging.debug('%s function took %0.3f ms' % (f.func_name, (time2-time1)*1000.0))
+        logging.debug('%s function took %0.3f ms' % (f.func_name, (time2 - time1) * 1000.0))
         return ret
+
     return wrap
 
 
@@ -52,12 +54,12 @@ class MyListener(object):
         print("Service %s added, service info: %s" % (name, info))
 
         # Try zeroconf cache first
-        info = ServiceInfo(type, name, properties = {})
+        info = ServiceInfo(type, name, properties={})
         for record in zeroconf.cache.entries_with_name(name.lower()):
             info.update_record(zeroconf, time.time(), record)
         for record in zeroconf.cache.entries_with_name(info.server):
             info.update_record(zeroconf, time.time(), record)
-            if info.address and info.address[:2] != b'\xa9\xfe': # 169.254.x.x addresses are self-assigned; reject them
+            if info.address and info.address[:2] != b'\xa9\xfe':  # 169.254.x.x addresses are self-assigned; reject them
                 break
         # Request more data if info from cache is not complete
         if not info.address or not info.port:
@@ -71,14 +73,13 @@ class MyListener(object):
         self.controller.list_of_printing_services.add(address)
 
 
-
 class Controller(QObject):
     def __init__(self, app, local_path='', progress_bar=None):
         super(Controller, self).__init__()
         logging.info('Local path: ' + local_path)
         self.view = []
 
-        #this flag is only for development only, Development = True, Production = False
+        # this flag is only for development only, Development = True, Production = False
         self.development_flag = False
         progress_bar(10)
 
@@ -90,7 +91,7 @@ class Controller(QObject):
         self.analyzer = Analyzer(self)
         self.gcode = None
 
-        #looking for printing services
+        # looking for printing services
         self.zeroconf = Zeroconf()
         self.listener = MyListener(self)
         self.browser = ServiceBrowser(self.zeroconf, "_octoprint._tcp.local.", self.listener)
@@ -116,7 +117,7 @@ class Controller(QObject):
                 'rotateButton': False,
                 'scaleButton': False,
                 'supportButton': False
-        }
+            }
 
         self.actual_printer = deepcopy(self.settings['printer'])
         self.actual_printer_mod = ""
@@ -128,7 +129,7 @@ class Controller(QObject):
                 'cs_CZ': 'Czech',
                 'en_US': 'English',
                 'es_ES': 'Spanish',
-		        'de_DE': 'German'
+                'de_DE': 'German'
             },
             'printer': {
                 'i3': 'i3',
@@ -149,18 +150,17 @@ class Controller(QObject):
 
         self.warning_message_buffer = []
 
-
-        #variables for help
+        # variables for help
         self.last_pos = QPoint()
         self.ray_start = [.0, .0, .0]
         self.ray_end = [.0, .0, .0]
         self.hitPoint = [.0, .0, .0]
         self.last_ray_pos = [.0, .0, .0]
         self.original_scale = 0.0
-        self.original_scale_point = numpy.array([0.,0.,0.])
-        self.origin_rotation_point = numpy.array([0.,0.,0.])
+        self.original_scale_point = numpy.array([0., 0., 0.])
+        self.origin_rotation_point = numpy.array([0., 0., 0.])
         self.res_old = numpy.array([0., 0., 0.])
-        self.render_status = 'model_view'   #'gcode_view'
+        self.render_status = 'model_view'  # 'gcode_view'
         self.status = 'edit'
         self.is_model_loaded = False
         self.canceled = False
@@ -168,7 +168,7 @@ class Controller(QObject):
         self.resolution_of_texture = 16
         self.soluble_extruder = -1
 
-        #event flow flags
+        # event flow flags
         self.mouse_double_click_event_flag = False
         self.mouse_press_event_flag = False
         self.mouse_move_event_flag = False
@@ -178,7 +178,7 @@ class Controller(QObject):
         self.object_select_event_flag = False
         self.cursor_over_object = False
 
-        #scene work flags
+        # scene work flags
         self.scene_was_saved = False
         self.scene_was_generated = False
         self.gcode_was_saved = False
@@ -198,7 +198,7 @@ class Controller(QObject):
 
         self.app = app
         self.app_parameters = app.arguments()
-        #calculate dpi coeficient for scale of widgets
+        # calculate dpi coeficient for scale of widgets
         self.dpi_coef = app.desktop().logicalDpiX() / 96.
         self.dpi_scale = 0 if self.dpi_coef == 1.0 else 2
 
@@ -236,14 +236,13 @@ class Controller(QObject):
 
         progress_bar(97)
 
+        # logging.info('Parameters: %s' % ([unicode(i.toUtf8(), encoding="UTF-8") for i in self.app_parameters]))
 
-        #logging.info('Parameters: %s' % ([unicode(i.toUtf8(), encoding="UTF-8") for i in self.app_parameters]))
-
-        #print(str(type(self.app_parameters)))
+        # print(str(type(self.app_parameters)))
         if len(self.app_parameters) >= 3:
             for file in self.app_parameters[2:]:
-                #logging.info('%s' %unicode(file.toUtf8(), encoding="UTF-8"))
-                #self.open_file(unicode(file.toUtf8(), encoding="UTF-8"))
+                # logging.info('%s' %unicode(file.toUtf8(), encoding="UTF-8"))
+                # self.open_file(unicode(file.toUtf8(), encoding="UTF-8"))
                 self.open_file(file)
 
         progress_bar(99)
@@ -279,11 +278,10 @@ class Controller(QObject):
         self.view.open_color_pick_dialog4()
 
     def get_extruder_color(self, extruder_number):
-        #print(extruder_number)
-        #print(self.view.extruder1_color)
+        # print(extruder_number)
+        # print(self.view.extruder1_color)
         extruders_color_lst = [self.view.extruder1_color, self.view.extruder2_color, self.view.extruder3_color, self.view.extruder4_color]
-        return extruders_color_lst[extruder_number-1]
-
+        return extruders_color_lst[extruder_number - 1]
 
     def is_multimaterial(self):
         if self.printer_number_of_materials > 1:
@@ -299,22 +297,21 @@ class Controller(QObject):
         self.single_material_mode = self.view.single_material_mode_checkbox.isChecked()
 
         if self.single_material_mode:
-            #set single material GUI
-            #print("set single material mode")
+            # set single material GUI
+            # print("set single material mode")
             self.set_printer_mod(self.is_actual_printer_multimode())
             self.view.set_multimaterial_gui_off()
             self.remove_wipe_tower()
             self.update_scene()
             self.incompatible_materials = False
         else:
-            #set multi material GUI
-            #print("set multimaterial mode")
+            # set multi material GUI
+            # print("set multimaterial mode")
             self.set_printer_mod("")
             self.view.set_multimaterial_gui_on()
             self.change_of_wipe_tower_settings(1)
             self.update_wipe_tower()
             self.update_scene()
-
 
         self.view.update_gui_for_material(1)
 
@@ -346,17 +343,13 @@ class Controller(QObject):
         if self.incompatible_materials:
             self.warning_message_buffer.append(u"• " + self.message_object04)
 
-
         if self.scene.is_collision_of_wipe_tower_and_objects():
             self.warning_message_buffer.append(u"• " + self.message_object05)
-
-
 
     def get_warnings(self):
         messages = self.scene.get_warnings()
         self.filtrate_warning_msgs()
         return messages + self.warning_message_buffer
-
 
     def create_messages(self):
         self.message_object00 = self.tr("Object ")
@@ -365,7 +358,6 @@ class Controller(QObject):
         self.message_object03 = self.tr("For better adhesion turn Brim parametr on.")
         self.message_object04 = self.tr("Incompatible materials, its possible the print will fail.")
         self.message_object05 = self.tr("Collision of wipe tower and object.")
-
 
     def check_version(self):
         if not self.app_config.is_version_actual:
@@ -383,16 +375,16 @@ class Controller(QObject):
         else:
             return
 
-        extruders_set_tmp = list(set([ m.extruder for m in self.scene.get_models(with_wipe_tower=False)]))
+        extruders_set_tmp = list(set([m.extruder for m in self.scene.get_models(with_wipe_tower=False)]))
 
-        if self.view.get_support_option() >=1 :
+        if self.view.get_support_option() >= 1:
             extruders_set_tmp.append(self.soluble_extruder)
             extruders_set = list(extruders_set_tmp)
         else:
             extruders_set = list(extruders_set_tmp)
 
         if 1 in extruders_set:
-            #self.view.extruder1_l.setStyleSheet("font-weight: bold;")
+            # self.view.extruder1_l.setStyleSheet("font-weight: bold;")
             self.view.extruder1_l.setStyleSheet("QLabel { font-weight: bold;}")
             self.view.extruder1_l.setToolTip(self.view.used_extruder_tooltip)
         else:
@@ -420,11 +412,7 @@ class Controller(QObject):
             self.view.extruder4_l.setStyleSheet("font-weight: normal;")
             self.view.extruder4_l.setToolTip("")
 
-
         self.update_wipe_tower()
-
-
-
 
     def exit_event(self):
         self.zeroconf.close()
@@ -454,8 +442,6 @@ class Controller(QObject):
         else:
             self.analyzer.cancel_analyz()
             return True
-
-
 
     def is_something_to_save(self):
         models_lst = self.scene.get_models(with_wipe_tower=False)
@@ -496,7 +482,7 @@ class Controller(QObject):
         original_units = filament_lenght_mm[-2:]
         if original_units == "mm":
             if original_filament_lenght >= 1000.:
-                recalculated_filament_lenght = original_filament_lenght*0.001
+                recalculated_filament_lenght = original_filament_lenght * 0.001
                 recalculated_units = "m"
             elif original_filament_lenght >= 10.:
                 recalculated_filament_lenght = original_filament_lenght * 0.1
@@ -528,7 +514,6 @@ class Controller(QObject):
         self.gcode_layer = '0.0'
         self.gcode_draw_from_button = False
 
-
     def write_config(self):
         config = RawConfigParser()
         config.add_section('settings')
@@ -539,7 +524,6 @@ class Controller(QObject):
         config.set('settings', 'language', self.settings['language'])
         config.set('settings', 'analyze', self.settings['analyze'])
         config.set('settings', 'automatic_update_parameters', self.settings['automatic_update_parameters'])
-
 
         with open(self.app_config.config_path, 'w') as configfile:
             config.write(configfile)
@@ -554,13 +538,12 @@ class Controller(QObject):
         self.advance_settings = True
         self.view.object_group_box.setVisible(False)
         self.view.object_variable_layer_box.setVisible(True)
-        #self.view.variable_layer_widget.set_model(self.ac)
+        # self.view.variable_layer_widget.set_model(self.ac)
         self.update_scene()
 
     def set_gcode_slider(self, min, max, min_l, max_l):
         self.view.gcode_slider.setMinimum(min, min_l)
         self.view.gcode_slider.setMaximum(max, max_l)
-
 
     def set_gcode_instance(self, gcode_instance):
         self.gcode = gcode_instance
@@ -571,9 +554,8 @@ class Controller(QObject):
     def print_progress(self, progress):
         print("Progress: " + str(progress))
 
-
-    def read_gcode(self, filename = ''):
-        #print("reading gcode")
+    def read_gcode(self, filename=''):
+        # print("reading gcode")
         if filename:
             self.gcode = GCode(filename, self, self.set_gcode, self.set_saved_gcode)
         else:
@@ -584,16 +566,14 @@ class Controller(QObject):
         self.view.disable_editing()
         self.gcode.read_in_thread(self.set_progress_bar, self.set_gcode)
 
-
     def set_saved_gcode(self):
         self.set_progress_bar(100)
         self.status = 'generated'
         self.set_gcode_view()
         self.show_message_on_status_bar(self.view.tr("GCode saved"))
 
-
     def set_gcode(self):
-        #print("Set gcode")
+        # print("Set gcode")
         if not self.gcode.is_loaded:
             return
         self.status = 'generated'
@@ -606,7 +586,7 @@ class Controller(QObject):
 
         self.set_gcode_slider(min, max, min_l, max_l)
 
-        #What layer had to be show at start
+        # What layer had to be show at start
         self.gcode_layer = self.gcode.data_keys[1]
 
         self.view.gcode_label.setText(self.gcode.data_keys[0])
@@ -614,32 +594,30 @@ class Controller(QObject):
 
         self.set_gcode_view()
 
-
     def set_variable_layer_cursor(self, double_value):
         for m in self.scene.models:
             if m.isVisible and m.selected:
                 m.z_cursor = double_value
         self.update_scene()
 
-
     def set_gcode_layer(self, value):
         self.gcode_layer = self.gcode.data_keys[value]
         self.update_scene()
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def set_gcode_draw_from_button(self, val):
         self.gcode_draw_from_button = val
 
     def scene_was_sliced(self):
-        #self.set_save_gcode_button()
-        #self.read_gcode()
+        # self.set_save_gcode_button()
+        # self.read_gcode()
         self.view.gcode_slider.init_points()
         self.set_gcode_view()
         self.status = 'generated'
         self.app.alert(self.view, 0)
 
     def check_rotation_helper(self, event):
-        #print("check rotation")
+        # print("check rotation")
         id = self.get_id_under_cursor(event)
         if self.is_some_tool_under_cursor(id):
             self.view.update_scene()
@@ -647,7 +625,6 @@ class Controller(QObject):
     def unselect_tool_buttons(self):
         for tool in self.tools:
             tool.unpress_button()
-
 
     def set_gcode_view(self):
         self.unselect_objects()
@@ -659,7 +636,7 @@ class Controller(QObject):
         self.set_generate_button()
         self.view.enable_editing()
         self.status = 'edit'
-        #self.editable = editable
+        # self.editable = editable
         self.view.close_gcode_view()
         self.show_message_on_status_bar("")
 
@@ -687,14 +664,14 @@ class Controller(QObject):
         self.slicer_manager.cancel()
 
     def get_enumeration(self, section, enum):
-        return self.enumeration[section][enum] if section in self.enumeration and enum in self.enumeration[section] else str(section)+':'+str(enum)
+        return self.enumeration[section][enum] if section in self.enumeration and enum in self.enumeration[section] else str(section) + ':' + str(enum)
 
     def get_printer_name(self):
-        #TODO:Add code for read and detect printer name
+        # TODO:Add code for read and detect printer name
         return "Original Prusa i3"
 
     def get_firmware_version_number(self):
-        #TODO:Add code for download firmware version
+        # TODO:Add code for download firmware version
         return '1.0.1'
 
     def get_printers_labels_ls(self, only_visible=False):
@@ -740,8 +717,8 @@ class Controller(QObject):
             return list(data["printer_type"]), first
 
     def get_printer_materials_names_ls(self, printer_name):
-        #return self.printing_settings['materials']
-        #return [i['label'] for i in self.printing_settings['materials'] if i['name'] not in ['default']]
+        # return self.printing_settings['materials']
+        # return [i['label'] for i in self.printing_settings['materials'] if i['name'] not in ['default']]
         return self.printing_parameters.get_materials_for_printer(printer_name).keys()
 
     def get_printer_materials_labels_ls(self, printer_name):
@@ -756,7 +733,7 @@ class Controller(QObject):
         return [a[0] for a in list], first_index
 
     def get_printer_material_quality_labels_ls_by_material_name(self, material_name):
-        #return [self.printing_parameters.get_materials_quality_for_printer(self.actual_printer, material_name)['quality'][i]['label']
+        # return [self.printing_parameters.get_materials_quality_for_printer(self.actual_printer, material_name)['quality'][i]['label']
         #        for i in self.printing_parameters.get_materials_quality_for_printer(self.actual_printer, material_name)['quality']]
         first_index = 0
         data = self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material_name)['quality']
@@ -771,7 +748,7 @@ class Controller(QObject):
     def get_material_name_by_material_label(self, material_label):
         data = self.printing_parameters.get_materials_for_printer(self.get_actual_printer())
         for i in data:
-            if data[i]['label']==material_label:
+            if data[i]['label'] == material_label:
                 return i
         return None
 
@@ -781,8 +758,6 @@ class Controller(QObject):
             if data["quality"][i]['label'] == quality_label:
                 return i
         return None
-
-
 
     def get_printer_material_quality_labels_ls_by_material_label(self, material_label):
         materials_ls = self.printing_parameters.get_materials_for_printer(self.get_actual_printer())
@@ -800,7 +775,7 @@ class Controller(QObject):
         list = [[quality, data[quality]["sort"]] for quality in data]
         list = sorted(list, key=lambda a: a[1])
         return [a[0] for a in list]
-        #return [i for i in self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material)['quality']]
+        # return [i for i in self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material)['quality']]
 
     def get_printing_settings_for_material_in_extruder(self, extruder_number):
         if extruder_number in [1, 2, 3, 4]:
@@ -814,7 +789,6 @@ class Controller(QObject):
                 return self.get_printing_settings_for_material_by_label(self.view.extruder4_c.currentText())
         else:
             return None
-
 
     def get_printing_settings_for_material_by_name(self, material_name):
         # material = self.printing_settings['materials'][material_index]
@@ -834,7 +808,7 @@ class Controller(QObject):
         return printing_settings_tmp
 
     def update_mm_material_settings(self):
-        #print("Update mm material settigns")
+        # print("Update mm material settigns")
         # get combobox materials
         soluble_material_tmp = []
 
@@ -849,18 +823,15 @@ class Controller(QObject):
 
         # if one of them soluble then add special support form, if not support combo without it
         if 1 in soluble_material:
-            soluble_extruders = [i+1 for i, m in enumerate(soluble_material) if m == 1]
+            soluble_extruders = [i + 1 for i, m in enumerate(soluble_material) if m == 1]
             self.soluble_extruder = soluble_extruders[0]
             self.set_special_support_settings()
         else:
             self.soluble_extruder = -1
             self.set_normal_support_settings()
 
-
         self.show_warning_if_used_materials_are_not_compatible()
         self.actualize_extruder_set()
-
-
 
     def show_warning_if_used_materials_are_not_compatible(self):
         if self.is_multimaterial() and not self.is_single_material_mode():
@@ -877,47 +848,45 @@ class Controller(QObject):
         # if some materials are not compatible
         # read compatible with list for all selected materials
         compatible_with_lst.append(
-            self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
-                self.view.extruder1_c.currentText())["compatible_with"]))
+                self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
+                        self.view.extruder1_c.currentText())["compatible_with"]))
         compatible_with_lst.append(
-            self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
-                self.view.extruder2_c.currentText())["compatible_with"]))
+                self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
+                        self.view.extruder2_c.currentText())["compatible_with"]))
         compatible_with_lst.append(
-            self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
-                self.view.extruder3_c.currentText())["compatible_with"]))
+                self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
+                        self.view.extruder3_c.currentText())["compatible_with"]))
         compatible_with_lst.append(
-            self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
-                self.view.extruder4_c.currentText())["compatible_with"]))
-
+                self.check_compatible_with_lst(self.get_printing_settings_for_material_by_label(
+                        self.view.extruder4_c.currentText())["compatible_with"]))
 
         # find out which extruders are used and create filter it
-        used_extruders_tmp = list(set([m.extruder-1 for m in self.scene.get_models(with_wipe_tower=False)]))
+        used_extruders_tmp = list(set([m.extruder - 1 for m in self.scene.get_models(with_wipe_tower=False)]))
 
-        if self.view.get_support_option() >=1 :
-            used_extruders_tmp.append(self.soluble_extruder-1)
+        if self.view.get_support_option() >= 1:
+            used_extruders_tmp.append(self.soluble_extruder - 1)
 
-        used_extruders = [i in used_extruders_tmp for i in range(0,4)]
-        #print(used_extruders_tmp)
-        #print(used_extruders)
-
+        used_extruders = [i in used_extruders_tmp for i in range(0, 4)]
+        # print(used_extruders_tmp)
+        # print(used_extruders)
 
         show_warning = False
         # generate warning message if some material is not compatible
         if len(used_extruders_tmp) > 1:
             # compare compatibility
-            #print("List compatibility: " + str(compatible_with_lst))
-            #print("List pouzitych extruderu: " + str(used_extruders))
+            # print("List compatibility: " + str(compatible_with_lst))
+            # print("List pouzitych extruderu: " + str(used_extruders))
 
             filtrated_used_materials = list(compress(list_of_materials, used_extruders))
             filtrated_compatible_lst = list(compress(compatible_with_lst, used_extruders))
 
             for i, material in enumerate(filtrated_used_materials):
-                #print("Material: " + str(material))
-                compatible_materials = [ mat for o, mat in enumerate(filtrated_compatible_lst) if not i==o ]
-                #print("Compatible materials: " + str(compatible_materials))
+                # print("Material: " + str(material))
+                compatible_materials = [mat for o, mat in enumerate(filtrated_compatible_lst) if not i == o]
+                # print("Compatible materials: " + str(compatible_materials))
                 for compat_mat in compatible_materials:
                     if not material in compat_mat:
-                        #print("Nekompatibilni")
+                        # print("Nekompatibilni")
                         show_warning = True
 
         if show_warning:
@@ -926,13 +895,11 @@ class Controller(QObject):
             self.incompatible_materials = False
         self.update_scene()
 
-
     def check_compatible_with_lst(self, lst):
         if lst == []:
             return list(self.get_printer_materials_names_ls(self.get_actual_printer()))
         else:
             return lst
-
 
     def set_special_support_settings(self):
         self.view.set_special_support_settings()
@@ -940,10 +907,9 @@ class Controller(QObject):
     def set_normal_support_settings(self):
         self.view.set_normal_support_settings()
 
-
     def get_infill_ls_and_index_of_default(self, default):
         first = 0
-        #infill_ls = ["0%", "10%", "15%", "20%", "30%", "50%", "70%"]
+        # infill_ls = ["0%", "10%", "15%", "20%", "30%", "50%", "70%"]
         infill_ls = [self.tr("Hollow/Shell - ") + "0%",
                      self.tr("Sparse - ") + "10%",
                      self.tr("Light - ") + "15%",
@@ -962,12 +928,12 @@ class Controller(QObject):
         return [0, 10, 15, 20, 30, 50, 70]
 
     def get_actual_printing_data(self):
-        #GUI parameters
+        # GUI parameters
         gui_parameters = self.view.get_actual_printing_data()
-        #Scene parameters(wipe tower possition)
+        # Scene parameters(wipe tower possition)
         scene_parameters = self.scene.get_wipe_tower_possition_and_size()
 
-        #multimaterial parameters
+        # multimaterial parameters
         multimat = dict()
         multimat["is_multimat"] = int(self.is_multimaterial() and not self.is_single_material_mode())
 
@@ -978,7 +944,6 @@ class Controller(QObject):
 
         return out
 
-
     def open_cancel_generating_dialog(self):
         ret = self.view.show_cancel_generating_dialog_and_load_file()
         if ret == QMessageBox.Yes:
@@ -986,7 +951,6 @@ class Controller(QObject):
             return True
         elif ret == QMessageBox.No:
             return False
-
 
     def open_cancel_gcode_reading_dialog(self):
         ret = self.view.show_cancel_generating_dialog_and_load_file()
@@ -1000,7 +964,7 @@ class Controller(QObject):
         if self.status in ['edit', 'canceled']:
             self.clear_tool_button_states()
 
-            #prepared to be g-code generated
+            # prepared to be g-code generated
             self.canceled = False
             self.close_object_settings()
             self.view.disable_editing()
@@ -1015,7 +979,7 @@ class Controller(QObject):
             self.view.open_gcode_view()
 
         elif self.status == 'generating':
-            #generating in progress
+            # generating in progress
             self.cancel_generation()
             self.cancel_gcode_loading()
             self.status = 'canceled'
@@ -1026,14 +990,14 @@ class Controller(QObject):
             self.cancel_gcode_loading()
             self.show_message_on_status_bar("")
         elif self.status == 'generated':
-            #already generated
+            # already generated
             if self.print_on_service:
                 self.print_on_actual_service()
             else:
                 self.save_gcode_file()
 
     def print_on_actual_service(self):
-        #TODO: Ask if prusacontrol dont have apikey for service, other way use one from file
+        # TODO: Ask if prusacontrol dont have apikey for service, other way use one from file
         apikey = 'CA54B5013E8C4C4B8BE6031F436133F5'
 
         http = urllib3.PoolManager()
@@ -1052,19 +1016,15 @@ class Controller(QObject):
                                      "command": "select", "print": 'true'},
                              headers={'X-Api-Key': apikey})
 
-        #TODO:Add progress bar for uploading gcode to printer
-
-
-
+        # TODO:Add progress bar for uploading gcode to printer
 
         print("Start sending gcode")
         print("...")
-        #r = post(url, files=files)
+        # r = post(url, files=files)
         print(str(r.status))
         print("gcode recieved OK")
         print("starting printing")
         print("Printing on OctoPrint")
-
 
     def cancel_gcode_loading(self):
         if self.gcode:
@@ -1074,10 +1034,9 @@ class Controller(QObject):
         self.disable_generate_button()
         self.set_generate_button()
         self.set_progress_bar(0)
-        #print("Cancel gcode loading end")
+        # print("Cancel gcode loading end")
 
-
-    #TODO:Better way
+    # TODO:Better way
     def generate_gcode_filename(self):
         suggest_filename = ""
         filename = ""
@@ -1114,16 +1073,14 @@ class Controller(QObject):
         if self.is_multimaterial() and not self.is_single_material_mode():
             suggest_filename = suggest_filename + "_MM"
 
-
         return suggest_filename
-
 
     def open_web_browser(self, url):
         webbrowser.open(url, 1)
 
     def set_printer(self, name):
-        #index = [i for i, data in enumerate(self.printers) if data['name']== name]
-        #print("Setting actual printer on: " + str(name))
+        # index = [i for i, data in enumerate(self.printers) if data['name']== name]
+        # print("Setting actual printer on: " + str(name))
         self.actual_printer = deepcopy(name)
         self.settings['printer'] = deepcopy(name)
         self.actual_printer_mod = ""
@@ -1138,7 +1095,7 @@ class Controller(QObject):
             return self.actual_printer
 
     def change_of_wipe_tower_settings(self, value):
-        #print("change of wipe tower settings: " +str(value))
+        # print("change of wipe tower settings: " +str(value))
         # value reduce 0 - small wipe tower 5
         # value normal 1 - normal wipe tower 15
         # value increase/soluble 2 - bigger wipe tower 20
@@ -1150,10 +1107,7 @@ class Controller(QObject):
         elif value == 2:
             self.scene.wipe_tower_size_y = 20.
 
-
         self.recalculate_wipe_tower()
-
-
 
     def send_feedback(self):
         if self.settings['language'] == 'cs_CZ':
@@ -1224,7 +1178,7 @@ class Controller(QObject):
             data = url
         else:
             data = self.view.open_project_file_dialog()
-        #logging.debug('open project file %s' %data)
+        # logging.debug('open project file %s' %data)
         self.import_project(data)
         self.show_warning_if_used_materials_are_not_compatible()
         self.actualize_extruder_set()
@@ -1277,7 +1231,7 @@ class Controller(QObject):
         try:
             self.status = "saving_gcode"
             self.view.saving_gcode()
-            #copyfile(self.app_config.tmp_place + "out.gcode", filename_out)
+            # copyfile(self.app_config.tmp_place + "out.gcode", filename_out)
             self.gcode.set_color_change_data(color_change_data)
             self.gcode.write_with_changes_in_thread(self.gcode.filename, filename_out, self.set_progress_bar)
 
@@ -1292,17 +1246,15 @@ class Controller(QObject):
 
     def open_model_file(self):
         data = self.view.open_model_file_dialog()
-        #logging.debug('open model#  file %s' %data)
+        # logging.debug('open model#  file %s' %data)
         for path in data:
-            #print("File path type: " + str(type(path)))
+            # print("File path type: " + str(type(path)))
             self.import_model(path)
 
     def open_multipart_model(self):
         data = self.view.open_model_file_dialog()
         self.load_multipart_model(data)
         self.actualize_extruder_set()
-
-
 
     def load_multipart_model(self, lst_of_urls):
         self.show_message_on_status_bar(self.tr("Loading multi part model"))
@@ -1315,11 +1267,10 @@ class Controller(QObject):
             self.scene.models.append(model)
             model.extruder = extruder_counter
             if extruder_counter <= 3:
-                extruder_counter +=1
+                extruder_counter += 1
             else:
                 extruder_counter = 1
             model_lst.append(model)
-
 
         multiModel = sceneData.MultiModel(model_lst, self.scene)
         self.scene.multipart_models.append(multiModel)
@@ -1331,7 +1282,6 @@ class Controller(QObject):
 
         if self.is_multimaterial():
             self.recalculate_wipe_tower()
-
 
     def import_model(self, path, one_model=False):
         self.view.statusBar().showMessage('Load file name: ' + path)
@@ -1348,7 +1298,7 @@ class Controller(QObject):
         self.update_scene()
         self.is_model_loaded = True
         return model
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def import_project(self, path):
         project_file = ProjectFile(self.scene, path)
@@ -1357,8 +1307,7 @@ class Controller(QObject):
             self.recalculate_wipe_tower()
         self.update_scene()
 
-        #self.view.update_scene()
-
+        # self.view.update_scene()
 
     def save_project(self, path):
         self.scene.check_models_name()
@@ -1375,7 +1324,7 @@ class Controller(QObject):
                 self.disable_generate_button()
 
     def update_firmware(self):
-        #TODO:Add code for update of firmware
+        # TODO:Add code for update of firmware
         pass
 
     def open_object_settings_dialog(self, object_id):
@@ -1402,21 +1351,19 @@ class Controller(QObject):
 
         if is_change:
             self.set_printer(temp_settings['printer'])
-            if self.printer_number_of_materials>1:
+            if self.printer_number_of_materials > 1:
                 self.view.set_multimaterial_gui_on(True)
-                #self.view.update_gui_for_material(1)
+                # self.view.update_gui_for_material(1)
                 self.update_mm_material_settings()
-                #self.add_wipe_tower()
+                # self.add_wipe_tower()
                 self.update_wipe_tower()
             else:
                 self.view.set_multimaterial_gui_off(True)
-                #self.view.update_gui_for_material(1)
+                # self.view.update_gui_for_material(1)
                 self.remove_wipe_tower()
             self.view.update_gui_for_material(1)
 
         self.settings = temp_settings
-
-
 
     def add_wipe_tower(self):
         self.scene.create_wipe_tower()
@@ -1434,9 +1381,9 @@ class Controller(QObject):
         self.set_progress_bar(int((100. / 9.)))
         if self.scene.models:
             self.save_whole_scene_to_one_prusa_file(self.app_config.tmp_place + "tmp.prusa")
-            #if self.is_multimaterial() and not self.is_single_material_mode():
+            # if self.is_multimaterial() and not self.is_single_material_mode():
             #    self.save_whole_scene_to_one_prusa_file(self.app_config.tmp_place + "tmp.prusa")
-            #else:
+            # else:
             #    self.scene.save_whole_scene_to_one_stl_file(self.app_config.tmp_place + "tmp.stl")
             self.slicer_manager.slice()
 
@@ -1452,10 +1399,10 @@ class Controller(QObject):
         self.app.exit()
 
     def set_print_info_text(self, string):
-        #print("Nejaky text ze Sliceru: " + string)
+        # print("Nejaky text ze Sliceru: " + string)
         string = string.split(' ')
         self.filament_use = string[0]
-        #self.gcode.set_print_info_text(string[0])
+        # self.gcode.set_print_info_text(string[0])
 
     def scene_was_changed(self):
         if self.status == 'generating':
@@ -1472,8 +1419,8 @@ class Controller(QObject):
         self.update_scene()
 
     def set_camera_move_function(self):
-        self.camera_move=True
-        self.camera_rotate=False
+        self.camera_move = True
+        self.camera_rotate = False
 
     def set_camera_rotation_function(self):
         self.camera_move = False
@@ -1486,7 +1433,7 @@ class Controller(QObject):
         self.cursor_over_object = False
 
     def is_some_tool_under_cursor(self, object_id):
-        #print("Is some tool under cursor")
+        # print("Is some tool under cursor")
         for tool in self.tools:
             if tool.id == object_id:
                 return True
@@ -1503,7 +1450,6 @@ class Controller(QObject):
             if object_id == model.id:
                 return model
         return None
-
 
     def is_some_tool_helper_under_cursor(self, object_id):
         if object_id == 0:
@@ -1557,24 +1503,18 @@ class Controller(QObject):
                 else:
                     model.rotationAxis = []
                     model.scalenAxis = []
-                    #model.selected = False
-
+                    # model.selected = False
 
     def set_active_tool_helper_by_id(self, object_id):
         pass
 
-
     def recalculate_wipe_tower(self):
-        #print("calculating wipe tower")
+        # print("calculating wipe tower")
         self.scene.update_wipe_tower()
-
-
-
-
 
     @staticmethod
     def is_ctrl_pressed():
-        #print("is_ctrl_pressed")
+        # print("is_ctrl_pressed")
         modifiers = QApplication.keyboardModifiers()
         if modifiers == Qt.ControlModifier:
             return True
@@ -1582,27 +1522,27 @@ class Controller(QObject):
             return False
 
     def is_object_already_selected(self, object_id):
-        #print("is_object_already_selected")
+        # print("is_object_already_selected")
         for model in self.scene.models:
-            #object founded
+            # object founded
             if object_id == model.id:
-                #print("Je model oznaceny: " + str(model.selected))
+                # print("Je model oznaceny: " + str(model.selected))
                 if model.selected:
-                    #object is selected
-                    #print("return True")
+                    # object is selected
+                    # print("return True")
                     return True
                 else:
-                    #object is not selected
-                    #print("return False")
+                    # object is not selected
+                    # print("return False")
                     return False
-        #No object with id in scene.models
+        # No object with id in scene.models
         return None
 
     def unselect_objects_and_select_this_one(self, object_id):
         self.unselect_objects()
         one_selected = False
         for model in self.scene.models:
-            #object founded
+            # object founded
             if object_id == model.id:
                 model.selected = True
                 one_selected = True
@@ -1612,7 +1552,6 @@ class Controller(QObject):
             return True
         else:
             return False
-
 
     def unselect_object(self, object_id):
         for model in self.scene.models:
@@ -1633,10 +1572,8 @@ class Controller(QObject):
                 return True
         return False
 
-
-
     def unselect_objects(self):
-        #print("Unselect objects")
+        # print("Unselect objects")
         for model in self.scene.models:
             model.selected = False
 
@@ -1650,7 +1587,7 @@ class Controller(QObject):
         if self.settings['toolButtons']['rotateButton']:
             if self.find_object_and_rotation_axis_by_color(event):
                 self.update_scene()
-                #self.view.update_scene()
+                # self.view.update_scene()
 
     def copy_selected_objects(self):
         self.scene.copy_selected_objects()
@@ -1669,8 +1606,6 @@ class Controller(QObject):
     def undo_function(self):
         self.view.glWidget.undo_button.press_button()
 
-
-
     def key_press_event(self, event):
         key = event.key()
 
@@ -1682,27 +1617,27 @@ class Controller(QObject):
             self.delete_selected_objects()
             self.update_scene()
         elif key in [Qt.Key_C] and self.is_ctrl_pressed() and self.render_status == 'model_view':
-            #print("Copy models")
+            # print("Copy models")
             self.copy_selected_objects()
             self.update_scene()
         elif key in [Qt.Key_V] and self.is_ctrl_pressed() and self.render_status == 'model_view':
-            #print("Paste models")
+            # print("Paste models")
             self.paste_selected_objects()
             self.update_scene()
         elif key in [Qt.Key_Z] and self.is_ctrl_pressed() and self.render_status == 'model_view':
-            #print("Undo pressed")
+            # print("Undo pressed")
             self.unselect_tool_buttons()
             self.undo_function()
-            #self.undo_button_pressed()
+            # self.undo_button_pressed()
             self.update_scene()
         elif key in [Qt.Key_Y] and self.is_ctrl_pressed() and self.render_status == 'model_view':
-            #print("Redo pressed")
+            # print("Redo pressed")
             self.unselect_tool_buttons()
             self.do_function()
-            #self.do_button_pressed()
+            # self.do_button_pressed()
             self.update_scene()
         elif key in [Qt.Key_R] and self.render_status == 'model_view' and not self.is_ctrl_pressed():
-            #print("R pressed ")
+            # print("R pressed ")
             if self.view.glWidget.rotateTool.is_pressed():
                 self.unselect_tool_buttons()
             else:
@@ -1710,7 +1645,7 @@ class Controller(QObject):
                 self.view.glWidget.rotateTool.press_button()
             self.update_scene()
         elif key in [Qt.Key_S] and self.render_status == 'model_view' and not self.is_ctrl_pressed():
-            #print("S pressed ")
+            # print("S pressed ")
             if self.view.glWidget.scaleTool.is_pressed():
                 self.unselect_tool_buttons()
             else:
@@ -1719,26 +1654,24 @@ class Controller(QObject):
             self.update_scene()
         elif key in [Qt.Key_A] and self.render_status == 'model_view':
             if self.is_ctrl_pressed() and not self.settings['toolButtons']['rotateButton'] and not self.settings['toolButtons']['scaleButton']:
-                #print("A and ctrl pressed")
+                # print("A and ctrl pressed")
                 self.select_all()
                 self.update_scene()
             elif not self.is_ctrl_pressed() and not self.settings['toolButtons']['rotateButton'] and not self.settings['toolButtons']['scaleButton']:
-                #print("just A pressed")
+                # print("just A pressed")
                 self.unselect_tool_buttons()
                 self.scene.automatic_models_position()
                 self.update_scene()
         elif key in [Qt.Key_I] and self.render_status == 'model_view' and not self.settings['toolButtons']['rotateButton'] and not self.settings['toolButtons']['scaleButton']:
             if self.is_ctrl_pressed():
-                #print("I and ctrl pressed ")
+                # print("I and ctrl pressed ")
                 self.invert_selection()
                 self.update_scene()
 
         event.accept()
 
-
     def mouse_double_click(self, event):
         event.accept()
-
 
     def select_all(self):
         for m in self.scene.models:
@@ -1761,32 +1694,31 @@ class Controller(QObject):
                 self.open_object_settings(object_id)
     '''
 
-
     def mouse_press_event(self, event):
-        #print("Mouse press event")
+        # print("Mouse press event")
         self.clear_event_flag_status()
         self.mouse_press_event_flag = True
 
         newRayStart, newRayEnd = self.view.get_cursor_position(event)
         self.res_old = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
-        #Je stisknuto prave tlacitko?
+        # Je stisknuto prave tlacitko?
         if event.button() & Qt.RightButton:
             self.set_camera_move_function()
-        #Je stisknuto leve tlacitko?
+        # Je stisknuto leve tlacitko?
         elif event.button() & Qt.LeftButton:
-            #Je kurzor nad nejakym objektem?
+            # Je kurzor nad nejakym objektem?
             if self.render_status == 'model_view' and self.status in ['edit', 'canceled']:
                 object_id = self.get_id_under_cursor(event)
                 if object_id == 0 and self.settings['toolButtons']['supportButton']:
                     if self.scene.actual_support:
                         self.scene.save_actual_support()
-                elif object_id==0:
+                elif object_id == 0:
                     self.set_camera_rotation_function()
                 else:
-                    #Je pod kurzorem nejaky tool?
+                    # Je pod kurzorem nejaky tool?
                     if self.is_some_tool_under_cursor(object_id):
-                        #print("pod kurzorem je Tool")
-                        #self.unselect_objects()
+                        # print("pod kurzorem je Tool")
+                        # self.unselect_objects()
                         self.tool_press_event_flag = True
                         self.tool = self.get_tool_by_id(object_id)
                         for t in self.tools:
@@ -1794,46 +1726,46 @@ class Controller(QObject):
                                 t.unpress_button()
                             else:
                                 self.tool.press_button()
-                        #tool.activate_tool()
+                        # tool.activate_tool()
 
-                    #Je pod kurzorem nejaky tool helper?
+                    # Je pod kurzorem nejaky tool helper?
                     elif self.is_some_tool_helper_under_cursor(object_id):
-                        #print("tool helper under cursor")
+                        # print("tool helper under cursor")
                         self.tool_helper_press_event_flag = True
-                        #self.set_active_tool_helper_by_id(object_id)
+                        # self.set_active_tool_helper_by_id(object_id)
                         self.prepare_tool(event)
 
                     elif self.is_object_already_selected(object_id) and self.is_ctrl_pressed():
-                        #print("object already selected and ctrl pressed")
+                        # print("object already selected and ctrl pressed")
                         self.object_select_event_flag = True
                         self.cursor_over_object = True
                         self.unselect_object(object_id)
                     elif self.is_ctrl_pressed():
-                        #print("ctrl pressed")
+                        # print("ctrl pressed")
                         if self.settings['toolButtons']['rotateButton'] or self.settings['toolButtons']['scaleButton']:
                             self.unselect_objects()
                         self.select_object(object_id)
-                        #disable object edit gui, its not possible for group
+                        # disable object edit gui, its not possible for group
                         self.view.disable_object_settings_panel()
                         self.cursor_over_object = True
                     elif self.is_object_already_selected(object_id) and self.is_some_tool_active():
-                        #print("object already selected and tool placeonface is on")
-                        self.tool=self.get_active_tool()
+                        # print("object already selected and tool placeonface is on")
+                        self.tool = self.get_active_tool()
                         self.prepare_tool(event)
                         self.cursor_over_object = True
                     elif self.is_object_already_selected(object_id):
-                        #print("object already selected")
+                        # print("object already selected")
                         pass
                         self.cursor_over_object = True
                     else:
-                        #print("else")
+                        # print("else")
                         self.unselect_objects()
                         self.select_object(object_id)
                         self.cursor_over_object = True
 
-                    #print("Aktualni tool je: " + self.tool)
+                    # print("Aktualni tool je: " + self.tool)
                     self.tool = self.get_active_tool()
-                    #Je objekt oznaceny?
+                    # Je objekt oznaceny?
                     '''
                     elif self.is_ctrl_pressed():
                         if self.is_object_already_selected(object_id):
@@ -1841,8 +1773,7 @@ class Controller(QObject):
                         else:
                             self.select_object(object_id)
                     '''
-                    #elif self.is_object_already_selected(object_id):
-
+                    # elif self.is_object_already_selected(object_id):
 
                     '''
                     elif self.unselect_objects_and_select_this_one(object_id):
@@ -1865,46 +1796,44 @@ class Controller(QObject):
 
 
             else:
-                #print("Jiny status nez model_view")
+                # print("Jiny status nez model_view")
                 self.unselect_objects()
                 self.set_camera_rotation_function()
         self.update_scene()
-        #self.view.update_scene()
+        # self.view.update_scene()
         event.accept()
-
 
     def is_some_tool_active(self):
         for tool in self.tools:
-            if tool.is_pressed() and tool.tool_name=='placeonface':
+            if tool.is_pressed() and tool.tool_name == 'placeonface':
                 return True
 
         return False
 
-    #def get_active_tool(self):
+    # def get_active_tool(self):
     #    for tool in self.tools:
     #        if tool.is_pressed():
     #            return tool.tool_name
 
-
     def prepare_tool(self, event):
-        #print("prepare tool")
+        # print("prepare tool")
         if self.tool == 'rotate':
             for model in self.scene.models:
                 if model.selected:
-                    #newRayStart, newRayEnd = self.view.get_cursor_position(event)
-                    #self.origin_rotation_point = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
-                    #self.res_old = self.origin_rotation_point
-                    self.origin_rotation_point = numpy.array([1.,0.,0.])
+                    # newRayStart, newRayEnd = self.view.get_cursor_position(event)
+                    # self.origin_rotation_point = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
+                    # self.res_old = self.origin_rotation_point
+                    self.origin_rotation_point = numpy.array([1., 0., 0.])
                     self.origin_rotation_point += model.pos
                     self.origin_rotation_point[2] = 0.
                     self.res_old = self.origin_rotation_point
                     self.old_angle = model.rot[2]
-            #self.view.glWidget.oldHitPoint = numpy.array([0., 0., 0.])
-            #self.view.glWidget.hitPoint = numpy.array([0., 0., 0.])
+            # self.view.glWidget.oldHitPoint = numpy.array([0., 0., 0.])
+            # self.view.glWidget.hitPoint = numpy.array([0., 0., 0.])
 
 
         elif self.tool == 'placeonface':
-            #print("inside placeonface")
+            # print("inside placeonface")
             ray_start, ray_end = self.view.get_cursor_position(event)
             for model in self.scene.models:
                 if model.selected:
@@ -1915,49 +1844,48 @@ class Controller(QObject):
                         self.view.glWidget.v0 = face[0]
                         self.view.glWidget.v1 = face[1]
                         self.view.glWidget.v2 = face[2]
-                        #print("Nalezen objekt " + str(model))
+                        # print("Nalezen objekt " + str(model))
         elif self.tool == 'scale':
             ray_start, ray_end = self.view.get_cursor_position(event)
 
             for model in self.scene.models:
                 if model.selected:
                     if model.is_multipart_model:
-                        #pos = deepcopy(model.multipart_parent.pos)
-                        #pos[2] = 0.
+                        # pos = deepcopy(model.multipart_parent.pos)
+                        # pos[2] = 0.
                         self.original_scale = deepcopy(model.multipart_parent.scale)
                     else:
-                        #pos = deepcopy(model.pos)
-                        #pos[2] = 0.
+                        # pos = deepcopy(model.pos)
+                        # pos[2] = 0.
                         self.original_scale = deepcopy(model.scale)
 
-
     def mouse_move_event(self, event):
-        #print("Mouse move event")
+        # print("Mouse move event")
         self.mouse_move_event_flag = True
         dx = event.x() - self.last_pos.x()
         dy = event.y() - self.last_pos.y()
-        #diff = numpy.linalg.norm(numpy.array([dx, dy]))
+        # diff = numpy.linalg.norm(numpy.array([dx, dy]))
 
         if self.camera_move and self.mouse_press_event_flag:
-            #print("camera move")
+            # print("camera move")
             camStart, camDir, camUp, camRight = self.view.get_camera_direction(event)
-            right_move = -0.025*dx * camRight
-            up_move = 0.025*dy * camUp
+            right_move = -0.025 * dx * camRight
+            up_move = 0.025 * dy * camUp
 
             move_vector = right_move + up_move
             self.add_camera_position(move_vector)
 
         elif self.camera_rotate and self.mouse_press_event_flag:
-            #print("camera rotate")
+            # print("camera rotate")
             self.view.set_x_rotation(self.view.get_x_rotation() + 8 * dy)
             self.view.set_z_rotation(self.view.get_z_rotation() + 8 * dx)
-            #camera_pos, direction, _, _ = self.view.get_camera_direction(event)
-            #self.scene.camera_vector = direction - camera_pos
-        #Check if some tool helper is pressed after that decide which tool is selected and
-        #make some change, other way move
+            # camera_pos, direction, _, _ = self.view.get_camera_direction(event)
+            # self.scene.camera_vector = direction - camera_pos
+        # Check if some tool helper is pressed after that decide which tool is selected and
+        # make some change, other way move
         elif self.tool_helper_press_event_flag:
             if self.tool == 'rotate':
-                #print("rotate function")
+                # print("rotate function")
                 newRayStart, newRayEnd = self.view.get_cursor_position(event)
                 res = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
                 if res is not None:
@@ -1970,14 +1898,14 @@ class Controller(QObject):
                                 pos = deepcopy(model.pos)
                             pos[2] = 0.
 
-                            #New
+                            # New
                             new_vec = res - pos
-                            #self.view.glWidget.hitPoint = deepcopy(new_vec)
+                            # self.view.glWidget.hitPoint = deepcopy(new_vec)
                             new_vect_leng = numpy.linalg.norm(new_vec)
                             new_vec /= new_vect_leng
 
                             old_vec = self.res_old - pos
-                            #self.view.glWidget.oldHitPoint = deepcopy(old_vec)
+                            # self.view.glWidget.oldHitPoint = deepcopy(old_vec)
                             old_vec /= numpy.linalg.norm(old_vec)
 
                             cos_ang = numpy.dot(old_vec, new_vec)
@@ -1992,7 +1920,7 @@ class Controller(QObject):
 
                             if radius < 2.5:
                                 radius = 2.5
-                            radius *=.7
+                            radius *= .7
 
                             if new_vect_leng >= radius:
                                 if numpy.abs(alpha - numpy.pi) <= 0.05:
@@ -2005,15 +1933,15 @@ class Controller(QObject):
                             else:
                                 alpha_new = numpy.degrees(alpha) // 45.
                                 if model.is_multipart_model:
-                                    model.set_rot(model.multipart_parent.rot[0], model.multipart_parent.rot[1], alpha_new*(numpy.pi*.25), False, False, False)
+                                    model.set_rot(model.multipart_parent.rot[0], model.multipart_parent.rot[1], alpha_new * (numpy.pi * .25), False, False, False)
                                 else:
-                                    model.set_rot(model.rot[0], model.rot[1], alpha_new*(numpy.pi*.25), False, False, False)
+                                    model.set_rot(model.rot[0], model.rot[1], alpha_new * (numpy.pi * .25), False, False, False)
 
-                            #self.view.update_object_settings(model.id)
+                            # self.view.update_object_settings(model.id)
                             self.view.update_rotate_widgets(model.id)
                             self.scene_was_changed()
             elif self.tool == 'scale':
-                #print("scale function")
+                # print("scale function")
                 ray_start, ray_end = self.view.get_cursor_position(event)
                 # camera_pos, direction, _, _ = self.view.get_camera_direction(event)
                 for model in self.scene.models:
@@ -2041,27 +1969,25 @@ class Controller(QObject):
                         origin_size *= .5
 
                         if self.original_scale[0] == self.original_scale[1] == self.original_scale[2]:
-                            #same proportion
+                            # same proportion
                             v = l / numpy.linalg.norm(origin_size)
                             new_scale = numpy.array([v, v, v])
                         else:
                             v = l / numpy.linalg.norm(new_size)
-                            new_scale = numpy.array([v*(self.original_scale)[0],
-                                                v*(self.original_scale)[1],
-                                                v*(self.original_scale)[2]])
-
+                            new_scale = numpy.array([v * (self.original_scale)[0],
+                                                     v * (self.original_scale)[1],
+                                                     v * (self.original_scale)[2]])
 
                         new_scale = numpy.abs(new_scale)
                         model.set_scale_abs(new_scale[0], new_scale[1], new_scale[2])
 
-
-                        #self.last_l = l
+                        # self.last_l = l
 
                         self.view.update_scale_widgets(model.id)
                         self.scene_was_changed()
-        #Move function
+        # Move function
         elif self.settings['toolButtons']['supportButton']:
-            #print("support function")
+            # print("support function")
             newRayStart, newRayEnd = self.view.get_cursor_position(event)
             res = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
             if res is not None:
@@ -2070,7 +1996,7 @@ class Controller(QObject):
         elif not self.tool_helper_press_event_flag \
                 and self.mouse_press_event_flag \
                 and self.cursor_over_object:
-            #print("move function")
+            # print("move function")
             newRayStart, newRayEnd = self.view.get_cursor_position(event)
             res = sceneData.intersection_ray_plane(newRayStart, newRayEnd)
             if res is not None:
@@ -2078,18 +2004,18 @@ class Controller(QObject):
                 for model in self.scene.models:
                     if model.selected:
                         model.set_move(res_new)
-                        #self.view.update_object_settings(model.id)
+                        # self.view.update_object_settings(model.id)
                         self.view.update_position_widgets(model.id)
                         self.scene_was_changed()
                 self.res_old = res
 
         else:
-            #print("Mouse move event else vetev")
+            # print("Mouse move event else vetev")
             if self.render_status == 'model_view':
                 object_id = self.get_id_under_cursor(event)
-                #TOOLs hover effect
+                # TOOLs hover effect
                 if object_id > 0:
-                    #Je pod kurzorem nejaky tool?
+                    # Je pod kurzorem nejaky tool?
                     for tool in self.tools:
                         if tool.id == object_id:
                             tool.mouse_is_over(True)
@@ -2097,21 +2023,20 @@ class Controller(QObject):
                         else:
                             tool.mouse_is_over(False)
 
-                    #if self.settings['toolButtons']['rotateButton']:
+                    # if self.settings['toolButtons']['rotateButton']:
                     #    self.select_tool_helper_by_id(object_id)
-                        #for tool_helper in self.get_tools_helpers_id(1,0):
-                        #    if tool_helper == object_id:
+                    # for tool_helper in self.get_tools_helpers_id(1,0):
+                    #    if tool_helper == object_id:
                 else:
-                    #TODO:Disable tooltip
+                    # TODO:Disable tooltip
                     self.view.glWidget.setToolTip("")
                     for tool in self.tools:
                         tool.mouse_is_over(False)
         event.accept()
 
-
         self.last_pos = QPoint(event.pos())
         self.update_scene()
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def select_tool_helper(self, event):
         object_id = self.get_id_under_cursor(event)
@@ -2131,7 +2056,7 @@ class Controller(QObject):
                     m.rotationAxis = ""
                     m.scaleAxis = ""
 
-    #def support_tool_button_pressed(self):
+    # def support_tool_button_pressed(self):
     #    self.tool = "support"
 
     def organize_button_pressed(self):
@@ -2140,13 +2065,13 @@ class Controller(QObject):
     def get_active_tool(self):
         for tool in self.tools:
             if tool.pressed:
-                #print("Tool name: " + str(tool.tool_name))
+                # print("Tool name: " + str(tool.tool_name))
                 return tool.tool_name
         return 'move'
 
     def mouse_release_event(self, event):
         models_list = []
-        #print("Mouse releas event")
+        # print("Mouse releas event")
         self.mouse_release_event_flag = True
         self.set_camera_function_false()
         if self.tool in ['move', 'rotate', 'scale', 'placeonface']:
@@ -2157,7 +2082,7 @@ class Controller(QObject):
                         model.multipart_parent.update_min_max()
                         if not self.tool == 'scale':
                             model.multipart_parent.recalc_bounding_sphere()
-                        #TODO: add history for operations
+                        # TODO: add history for operations
                     else:
                         model.update_min_max()
                         if not self.tool == 'scale':
@@ -2165,17 +2090,17 @@ class Controller(QObject):
                         models_list.append(model)
             if models_list and self.mouse_move_event_flag:
                 self.scene.save_change(self.scene.models)
-                #self.scene.save_change(models_list)
+                # self.scene.save_change(models_list)
 
             self.update_wipe_tower()
 
         self.tool = ''
-        self.res_old = numpy.array([0.,0.,0.])
+        self.res_old = numpy.array([0., 0., 0.])
 
-        if event.button() & Qt.LeftButton and self.mouse_press_event_flag and\
-                self.mouse_release_event_flag and self.mouse_move_event_flag == False and\
-                self.object_select_event_flag==False and self.tool_press_event_flag == False:
-            #print("Podminky splneny")
+        if event.button() & Qt.LeftButton and self.mouse_press_event_flag and \
+                self.mouse_release_event_flag and self.mouse_move_event_flag == False and \
+                self.object_select_event_flag == False and self.tool_press_event_flag == False:
+            # print("Podminky splneny")
             self.clear_event_flag_status()
             self.unselect_objects()
         self.update_scene()
@@ -2183,16 +2108,13 @@ class Controller(QObject):
 
         self.make_analyze()
 
-
     def make_analyze(self):
         if self.scene.was_changed() and self.settings['analyze']:
             self.scene.set_no_changes()
             self.analyzer.make_analyze(self.analyze_done, self.set_analyze_result_messages)
 
-
     def analyze_done(self):
         self.scene.set_no_changes()
-
 
     def open_object_settings(self, object_id):
         self.set_basic_settings()
@@ -2205,10 +2127,10 @@ class Controller(QObject):
     def set_printable(self, is_printable):
         self.scene.printable = is_printable
         if is_printable == False:
-            #print("Disable genrate button")
+            # print("Disable genrate button")
             self.disable_generate_button()
         else:
-            #print("Enable genrate button")
+            # print("Enable genrate button")
             self.enable_generate_button()
 
     def disable_generate_button(self):
@@ -2226,15 +2148,15 @@ class Controller(QObject):
         for model in self.scene.models:
             if model.intersection_ray_bounding_sphere(self.ray_start, self.ray_end):
                 possible_hit.append(model)
-                nSelected+=1
+                nSelected += 1
             else:
-                #print("Tady bych to necekal")
+                # print("Tady bych to necekal")
                 model.selected = False
 
         if not nSelected:
             return False
 
-        #print("A tady taky ne")
+        # print("A tady taky ne")
         for model in possible_hit:
             if model.intersection_ray_model(self.ray_start, self.ray_end):
                 model.selected = not model.selected
@@ -2252,7 +2174,7 @@ class Controller(QObject):
         for model in self.scene.models:
             if model.intersection_ray_bounding_sphere(self.ray_start, self.ray_end):
                 possible_hit.append(model)
-                nSelected+=1
+                nSelected += 1
 
         if not nSelected:
             return False
@@ -2268,9 +2190,7 @@ class Controller(QObject):
         object = self.get_object_by_id(object_id)
         object.reset_transformation()
 
-
-
-#    @timing
+    #    @timing
     def get_id_under_cursor(self, event):
         return self.view.glWidget.get_id_under_cursor(event.x(), event.y())
 
@@ -2295,7 +2215,7 @@ class Controller(QObject):
             return False
         for model in self.scene.models:
             if find_id in model.get_id():
-                #print("Tady to je!!!")
+                # print("Tady to je!!!")
                 model.selected = not model.selected
                 return True
 
@@ -2307,34 +2227,34 @@ class Controller(QObject):
         if self.is_multimaterial():
             self.actualize_extruder_set()
             self.add_wipe_tower()
-        #self.view.update_scene(True)
+        # self.view.update_scene(True)
 
     def clear_gui(self):
         self.view.reinit()
 
     def reset(self):
-        #reset render mode
+        # reset render mode
         self.scene_was_changed()
         self.set_model_edit_view()
-        #reset gcode data
+        # reset gcode data
         self.clear_gcode()
-        #reset gui
+        # reset gui
         self.clear_gui()
         self.reset_scene()
         self.analyze_result = {}
 
     def import_image(self, path):
-        #TODO:Add importing of image(just plane with texture?)
+        # TODO:Add importing of image(just plane with texture?)
         pass
 
     def undo_button_pressed(self):
-        #print("Undo")
+        # print("Undo")
         self.clear_tool_button_states()
         self.scene.make_undo()
         self.update_scene()
 
     def do_button_pressed(self):
-        #print("Do")
+        # print("Do")
         self.clear_tool_button_states()
         self.scene.make_do()
         self.update_scene()
@@ -2343,57 +2263,56 @@ class Controller(QObject):
         self.clear_tool_button_states()
         self.settings['toolButtons']['selectButton'] = True
         self.update_scene()
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def move_button_pressed(self):
         if self.settings['toolButtons']['moveButton']:
-            self.settings['toolButtons']['moveButton'] = not(self.settings['toolButtons']['moveButton'])
+            self.settings['toolButtons']['moveButton'] = not (self.settings['toolButtons']['moveButton'])
         else:
             self.clear_tool_button_states()
             self.settings['toolButtons']['moveButton'] = True
         self.update_scene()
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def rotate_button_pressed(self):
         if self.settings['toolButtons']['rotateButton']:
-            self.settings['toolButtons']['rotateButton'] = not(self.settings['toolButtons']['rotateButton'])
+            self.settings['toolButtons']['rotateButton'] = not (self.settings['toolButtons']['rotateButton'])
         else:
             self.clear_tool_button_states()
             self.settings['toolButtons']['rotateButton'] = True
         self.update_scene()
         self.unselect_objects()
         self.select_object(self.scene.last_selected_object)
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def support_button_pressed(self):
         if self.settings['toolButtons']['supportButton']:
-            self.settings['toolButtons']['supportButton'] = not(self.settings['toolButtons']['supportButton'])
+            self.settings['toolButtons']['supportButton'] = not (self.settings['toolButtons']['supportButton'])
         else:
             self.clear_tool_button_states()
             self.settings['toolButtons']['supportButton'] = True
         self.update_scene()
 
-
     def scale_button_pressed(self):
         if self.settings['toolButtons']['scaleButton']:
-            self.settings['toolButtons']['scaleButton'] = not(self.settings['toolButtons']['scaleButton'])
+            self.settings['toolButtons']['scaleButton'] = not (self.settings['toolButtons']['scaleButton'])
         else:
             self.clear_tool_button_states()
             self.settings['toolButtons']['scaleButton'] = True
         self.update_scene()
         self.unselect_objects()
         self.select_object(self.scene.last_selected_object)
-        #self.view.update_scene()
+        # self.view.update_scene()
 
     def place_on_face_button_pressed(self):
-        #TODO:Add new tool
+        # TODO:Add new tool
         pass
 
     def clear_tool_button_states(self):
         self.settings['toolButtons'] = {a: False for a in self.settings['toolButtons']}
 
     def slicing_message(self, string_in):
-        #Translation of messages from slicing engine
+        # Translation of messages from slicing engine
         translation_table = {'Generating perimeters': self.tr('Generating perimeters'),
                              'Processing triangulated mesh': self.tr('Processing triangulated mesh'),
                              'Infilling layers': self.tr('Infilling layers'),
@@ -2410,7 +2329,6 @@ class Controller(QObject):
             string_out = string_in
 
         self.show_message_on_status_bar(string_out)
-
 
     def show_message_on_status_bar(self, string):
         self.view.statusBar().showMessage(string)
@@ -2432,7 +2350,6 @@ class Controller(QObject):
         elif ret == QMessageBox.No:
             return False
 
-
     def get_url_from_local_fileid(self, localFileID):
         if not self.app_config.system_platform in ["Darwin"]:
             return ""
@@ -2441,15 +2358,15 @@ class Controller(QObject):
             import CoreFoundation as CF
 
             relCFURL = CF.CFURLCreateWithFileSystemPath(
-                CF.kCFAllocatorDefault,
-                localFileID,
-                CF.kCFURLPOSIXPathStyle,
-                False  # is directory
+                    CF.kCFAllocatorDefault,
+                    localFileID,
+                    CF.kCFURLPOSIXPathStyle,
+                    False  # is directory
             )
             absCFURL = CF.CFURLCreateFilePathURL(
-                CF.kCFAllocatorDefault,
-                relCFURL,
-                objc.NULL
+                    CF.kCFAllocatorDefault,
+                    relCFURL,
+                    objc.NULL
             )
             url_tmp = str(absCFURL[0])
             if url_tmp.startswith('file://'):
@@ -2496,12 +2413,12 @@ class Controller(QObject):
         extensions_set = set(extensions_lst)
         if len(extensions_set) == 1:
             if list(extensions_set)[0] in ['stl']:
-                #show message of multipart model
+                # show message of multipart model
                 if self.open_ask_multipart_model_dialog():
-                    #load together
+                    # load together
                     self.load_multipart_model(list_of_urls)
                 else:
-                    #load separately
+                    # load separately
                     for url in list_of_urls:
                         self.import_model(url)
             self.show_warning_if_used_materials_are_not_compatible()
@@ -2513,12 +2430,11 @@ class Controller(QObject):
     def find_network_printers(self):
         pass
 
-
     def open_file(self, url):
         '''
         function for resolve which file type will be loaded
         '''
-        #print("Urls type: " + str(type(url)))
+        # print("Urls type: " + str(type(url)))
 
         if self.status in ['generating']:
             if not self.open_cancel_generating_dialog():
@@ -2530,30 +2446,27 @@ class Controller(QObject):
             if not self.open_cancel_gcode_preview_dialog():
                 return
 
-
         if self.app_config.system_platform in ["Darwin"]:
             if url.startswith('/.file/id='):
                 url = self.get_url_from_local_fileid(url)
 
-
-
         urlSplited = url.split('.')
-        if len(urlSplited)==2:
+        if len(urlSplited) == 2:
             fileEnd = urlSplited[1]
-        elif len(urlSplited)>2:
+        elif len(urlSplited) > 2:
             fileEnd = urlSplited[-1]
         else:
-            fileEnd=''
+            fileEnd = ''
 
         if fileEnd in ['stl', 'STL', 'Stl']:
-            #print('import model')
+            # print('import model')
             self.import_model(url)
         elif fileEnd in ['prusa', 'PRUSA']:
-            #print('open project')
+            # print('open project')
 
             self.open_project_file(url)
         elif fileEnd in ['jpeg', 'jpg', 'png', 'bmp']:
-            #print('import image')
+            # print('import image')
             self.import_image(url)
         elif fileEnd in ['gcode']:
             if self.is_something_to_save():
@@ -2562,5 +2475,3 @@ class Controller(QObject):
             self.read_gcode(url)
 
         self.actualize_extruder_set()
-
-

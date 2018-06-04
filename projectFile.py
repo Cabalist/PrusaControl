@@ -27,7 +27,7 @@ class ProjectFile(object):
             self.scene_xml = None
             self.scene = scene
 
-            #TODO:check which version is scene.xml version and according to chose class to read project file
+            # TODO:check which version is scene.xml version and according to chose class to read project file
             self.version = Version_1_0()
             self.version.load(scene, filename)
         else:
@@ -75,7 +75,7 @@ class Version_1_0(VersionAbstract):
         return "1.0"
 
     def load(self, scene, filename):
-        #open zipfile
+        # open zipfile
         with ZipFile(filename, 'r') as openedZipfile:
             tree = ET.fromstring(openedZipfile.read(self.xmlFilename))
             version = tree.find('version').text
@@ -101,7 +101,7 @@ class Version_1_0(VersionAbstract):
                 model_data['scale'] = ast.literal_eval(model.find('scale').text)
                 models_data.append(model_data)
 
-            #scene.models = []
+            # scene.models = []
             models_groups = {}
             groups_properties = {}
             for m in models_data:
@@ -114,7 +114,7 @@ class Version_1_0(VersionAbstract):
                 mesh = Mesh.from_file(filename=model_filename)
                 os.remove(model_filename)
 
-                #mesh = Mesh.from_file(filename="", fh=openedZipfile.open(m['file_name']))
+                # mesh = Mesh.from_file(filename="", fh=openedZipfile.open(m['file_name']))
                 if 'group' in m:
                     model = ModelTypeStl.load_from_mesh(mesh, filename=m['file_name'], normalize=not m['normalization'])
                 else:
@@ -155,7 +155,6 @@ class Version_1_0(VersionAbstract):
 
                 scene.models.append(model)
 
-
             for group in models_groups:
                 mm = MultiModel(models_groups[group], scene)
                 mm.pos = groups_properties[group]['pos']
@@ -172,20 +171,20 @@ class Version_1_0(VersionAbstract):
         return stripped
 
     def save(self, scene, filename):
-        printing_space =  scene.controller.printing_parameters.get_printer_parameters(scene.controller.actual_printer)
+        printing_space = scene.controller.printing_parameters.get_printer_parameters(scene.controller.actual_printer)
         zero = numpy.array(printing_space['printing_space'], dtype=float)
         zero *= -0.5
         zero[2] = 0.
-        #print(str(zero))
-        #create zipfile
+        # print(str(zero))
+        # create zipfile
         with ZipFile(filename, 'w', ZIP_DEFLATED) as zip_fh:
-            #create xml file describing scene
+            # create xml file describing scene
             root = ET.Element("scene")
-            ET.SubElement(root, "version").text=self.get_version()
+            ET.SubElement(root, "version").text = self.get_version()
             ET.SubElement(root, "zero").text = str(zero.tolist())
             models_tag = ET.SubElement(root, "models")
 
-            #this 3 lines are for slic3r, it cant handle diacritics in files inside zip file
+            # this 3 lines are for slic3r, it cant handle diacritics in files inside zip file
             for m in scene.models:
                 m.filename = self.remove_accents(m.filename)
             scene.check_models_name()
@@ -211,7 +210,7 @@ class Version_1_0(VersionAbstract):
             for model in models_from_scene_sorted:
                 if model.is_multipart_model:
                     model_tmp = model.multipart_parent
-                    #pos = deepcopy(model.pos)
+                    # pos = deepcopy(model.pos)
                     pos = deepcopy(model_tmp.pos)
                     pos *= 10.
                     model_element = ET.SubElement(models_tag, "model", name=model.filename)
@@ -223,7 +222,7 @@ class Version_1_0(VersionAbstract):
                     ET.SubElement(model_element, "rotation").text = str(model_tmp.rot.tolist())
                     ET.SubElement(model_element, "scale").text = str(model_tmp.scale.tolist())
                 else:
-                    pos = model.pos*10.
+                    pos = model.pos * 10.
                     model_element = ET.SubElement(models_tag, "model", name=model.filename)
                     ET.SubElement(model_element, "extruder").text = str(model.extruder)
                     if model.is_multipart_model:
@@ -233,16 +232,15 @@ class Version_1_0(VersionAbstract):
                     ET.SubElement(model_element, "rotation").text = str(model.rot.tolist())
                     ET.SubElement(model_element, "scale").text = str(model.scale.tolist())
 
-
-            #save xml file to new created zip file
+            # save xml file to new created zip file
             newXml = ET.tostring(root, encoding="utf-8")
             nice_formated_xml = minidom.parseString(newXml).toprettyxml(indent="   ", encoding="utf-8")
             zip_fh.writestr(self.xmlFilename, nice_formated_xml)
 
-            #write stl files to zip file
+            # write stl files to zip file
             for model in models_from_scene_sorted:
                 if model.isVisible and not model.is_wipe_tower:
-                    #transform data to stl file
+                    # transform data to stl file
                     mesh = model.get_mesh(False, False)
 
                     model_filename = scene.controller.app_config.tmp_place + model.filename
@@ -251,5 +249,3 @@ class Version_1_0(VersionAbstract):
                     os.remove(model_filename)
 
         return True
-
-

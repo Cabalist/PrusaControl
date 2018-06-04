@@ -3,10 +3,11 @@ import itertools
 
 __author__ = 'Tibor Vavra'
 
-class GlButton(object):
 
+class GlButton(object):
     newid = itertools.count(1)
-    def __init__(self, texture_off=None, texture_on=None, texture_hover=None, texture_background=None, size=[10., 10.], position=[0.0, 0.0], auto_release=False, tool_tip='', tool_name='', dpi_coef = 1.0):
+
+    def __init__(self, texture_off=None, texture_on=None, texture_hover=None, texture_background=None, size=[10., 10.], position=[0.0, 0.0], auto_release=False, tool_tip='', tool_name='', dpi_coef=1.0):
         self.id = next(self.newid) * 7013
         self.color_id = [(self.id & 0x000000FF) >> 0, (self.id & 0x0000FF00) >> 8, (self.id & 0x00FF0000) >> 16]
 
@@ -27,8 +28,8 @@ class GlButton(object):
         self.key = None
         self.subkey = None
 
-        self.tool_name=tool_name
-        self.tool_tip=tool_tip
+        self.tool_name = tool_name
+        self.tool_tip = tool_tip
 
     def set_callback(self, func):
         self.callback_function = func
@@ -41,7 +42,7 @@ class GlButton(object):
             self.pressed = False
         else:
             self.pressed = not self.pressed
-        #print("Byl stisknut " + self.tool_name)
+        # print("Byl stisknut " + self.tool_name)
         self.callback_function()
 
     def unpress_button(self):
@@ -73,16 +74,12 @@ class GlButton(object):
             self.callback_function()
 
     def check_button(self, color):
-        #return True if checked color is same as button color
-        #else return False
+        # return True if checked color is same as button color
+        # else return False
 
-        color_id = color[0] + (color[1]*255) + (color[2]*255*255)
+        color_id = color[0] + (color[1] * 255) + (color[2] * 255 * 255)
 
         if color_id == self.id:
             return True
         else:
             return False
-
-
-
-

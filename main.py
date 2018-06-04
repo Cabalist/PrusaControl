@@ -7,14 +7,16 @@ import os
 import platform
 import sys
 
-from PyQt4.QtCore import QCoreApplication, QFile, QIODevice, QObject, QThread, pyqtSignal, Qt
+from PyQt4.QtCore import QCoreApplication, QFile, QIODevice, QObject, QThread, Qt, pyqtSignal
 from PyQt4.QtGui import QApplication, QIcon, QLabel, QPixmap, QProgressBar, QSplashScreen, QStyleFactory
 
 from controller import Controller
 from parameters import AppParameters
+
 __author__ = 'Tibor Vavra'
 
 DEBUG = False
+
 
 class EventLoopRunner(QObject):
     finished = pyqtSignal()
@@ -27,11 +29,9 @@ class EventLoopRunner(QObject):
         self.system_platform = platform.system()
         self.progressbar_on = 0
 
-
         with __builtins__.open(self.base_path + "data/v.txt", 'r') as version_file:
             self.version_full = version_file.read()
             self.version = AppParameters.strip_version_string(self.version_full)
-
 
         self.is_running = True
         self.css = []
@@ -47,9 +47,8 @@ class EventLoopRunner(QObject):
         self.css = QFile(self.base_path + 'data/my_stylesheet.qss')
         self.css.open(QIODevice.ReadOnly)
 
-
         if self.system_platform in ["Darwin"]:
-            self.splash_pix = QPixmap(self.base_path + 'data/img/splashscreen_osx.png')    
+            self.splash_pix = QPixmap(self.base_path + 'data/img/splashscreen_osx.png')
             self.progressbar_on = 0
         else:
             self.splash_pix = QPixmap(self.base_path + 'data/img/splashscreen.png')
@@ -83,13 +82,11 @@ class EventLoopRunner(QObject):
             self.progressBar.setValue(value)
 
 
-
 def log_exception(excType, excValue, traceback):
     logging.error("Logging an uncaught exception",
-                 exc_info=(excType, excValue, traceback))
+                  exc_info=(excType, excValue, traceback))
 
     sys.__excepthook__(excType, excValue, traceback)
-
 
 
 def main():
@@ -103,9 +100,9 @@ def main():
 
     system_platform = platform.system()
     if system_platform in ['Windows']:
-        base_dir+='\\'
+        base_dir += '\\'
     else:
-        base_dir+='/'
+        base_dir += '/'
 
     sys.excepthook = log_exception
     app = QApplication(sys.argv)
@@ -119,7 +116,6 @@ def main():
 
     event_loop_runner_thread.start()
 
-     
     app.setApplicationName("PrusaControl")
     app.setOrganizationName("Prusa Research")
     app.setOrganizationDomain("prusa3d.com")
@@ -129,12 +125,12 @@ def main():
     app.setWindowIcon(QIcon(base_dir + "data/icon/favicon.ico"))
     if dpi == 96:
         file = QFile(base_dir + "data/my_stylesheet.qss")
-    #elif dpi == 72:
+    # elif dpi == 72:
     #    file = QFile(base_dir + "data/my_stylesheet.qss")
     else:
         file = QFile(base_dir + "data/my_stylesheet_without_f.qss")
     file.open(QFile.ReadOnly)
-    
+
     StyleSheet_tmp = str(file.readAll(), 'utf-8')
     if system_platform in ['Windows']:
         StyleSheet = StyleSheet_tmp.replace('base_dir', "")
@@ -143,12 +139,10 @@ def main():
 
     if not system_platform in ['Windows', 'Linux']:
         app.setStyle(QStyleFactory.create("Windows"))
-        
-    app.setStyleSheet(StyleSheet)    
 
+    app.setStyleSheet(StyleSheet)
 
-
-    #local_path = os.path.realpath(__file__)
+    # local_path = os.path.realpath(__file__)
 
     controller = Controller(app, base_dir, progressBar)
     progressBar(100)
@@ -165,7 +159,6 @@ def main():
     atexit.register(controller.write_config)
 
 
-
 if __name__ == '__main__':
     system_platform = platform.system()
     log_path = "/"
@@ -177,7 +170,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         logging.basicConfig(filename=os.path.expanduser("~" + log_path + "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.DEBUG)
-        #cProfile.runctx('main()', globals(), locals(), 'prusacontrol.profile')
+        # cProfile.runctx('main()', globals(), locals(), 'prusacontrol.profile')
     else:
         logging.basicConfig(filename=os.path.expanduser("~" + log_path + "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.WARNING)
 

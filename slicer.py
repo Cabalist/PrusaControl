@@ -44,60 +44,58 @@ class Slic3rEngineRunner(QObject):
     send_message = pyqtSignal(str)
     send_gcodedata = pyqtSignal(GCode)
 
-    #support parameters for soluble materials, list of parameters which will be used from soluble materials
+    # support parameters for soluble materials, list of parameters which will be used from soluble materials
     support_parameters = ["support_material_angle",
-                            "support_material_buildplate_only",
-                            "support_material_contact_distance",
-                            "support_material_enforce_layers",
-                            "support_material_extruder",
-                            "support_material_extrusion_width",
-                            "support_material_interface_extruder",
-                            "support_material_interface_layers",
-                            "support_material_interface_spacing",
-                            "support_material_interface_speed",
-                            "support_material_pattern",
-                            "support_material_spacing",
-                            "support_material_threshold",
-                            "support_material_with_sheath",
-                            "support_material_xy_spacing",
-                            "support_material_synchronize_layers"]
+                          "support_material_buildplate_only",
+                          "support_material_contact_distance",
+                          "support_material_enforce_layers",
+                          "support_material_extruder",
+                          "support_material_extrusion_width",
+                          "support_material_interface_extruder",
+                          "support_material_interface_layers",
+                          "support_material_interface_spacing",
+                          "support_material_interface_speed",
+                          "support_material_pattern",
+                          "support_material_spacing",
+                          "support_material_threshold",
+                          "support_material_with_sheath",
+                          "support_material_xy_spacing",
+                          "support_material_synchronize_layers"]
 
     multimaterial_spec_parameters = ["bridge_fan_speed",
-                        "cooling",
-                        "deretract_speed",
-                        "disable_fan_first_layers",
-                        "extrusion_multiplier",
-                        "fan_always_on",
-                        "fan_below_layer_time",
-                        "filament_density",
-                        "filament_diameter",
-                        "filament_max_volumetric_speed",
-                        "filament_type",
-                        "filament_soluble",
-                        "first_layer_bed_temperature",
-                        "first_layer_temperature",
-                        "max_fan_speed",
-                        "max_layer_height",
-                        "min_fan_speed",
-                        "min_layer_height",
-                        "min_print_speed",
-                        "nozzle_diameter",
-                        "retract_before_travel",
-                        "retract_before_wipe",
-                        "retract_layer_change",
-                        "retract_length",
-                        "retract_length_toolchange",
-                        "retract_lift",
-                        "retract_lift_above",
-                        "retract_lift_below",
-                        "retract_restart_extra",
-                        "retract_restart_extra_toolchange",
-                        "retract_speed",
-                        "slowdown_below_layer_time",
-                        "temperature",
-                        "wipe"]
-
-
+                                     "cooling",
+                                     "deretract_speed",
+                                     "disable_fan_first_layers",
+                                     "extrusion_multiplier",
+                                     "fan_always_on",
+                                     "fan_below_layer_time",
+                                     "filament_density",
+                                     "filament_diameter",
+                                     "filament_max_volumetric_speed",
+                                     "filament_type",
+                                     "filament_soluble",
+                                     "first_layer_bed_temperature",
+                                     "first_layer_temperature",
+                                     "max_fan_speed",
+                                     "max_layer_height",
+                                     "min_fan_speed",
+                                     "min_layer_height",
+                                     "min_print_speed",
+                                     "nozzle_diameter",
+                                     "retract_before_travel",
+                                     "retract_before_wipe",
+                                     "retract_layer_change",
+                                     "retract_length",
+                                     "retract_length_toolchange",
+                                     "retract_lift",
+                                     "retract_lift_above",
+                                     "retract_lift_below",
+                                     "retract_restart_extra",
+                                     "retract_restart_extra_toolchange",
+                                     "retract_speed",
+                                     "slowdown_below_layer_time",
+                                     "temperature",
+                                     "wipe"]
 
     def __init__(self, controller):
         super(Slic3rEngineRunner, self).__init__()
@@ -116,24 +114,23 @@ class Slic3rEngineRunner(QObject):
         else:
             self.slicer_place = ['slic3r']
 
-        #print(self.slicer_place)
+        # print(self.slicer_place)
 
         self.step_max = 9
         self.step = 0
 
-
     def translate_dictionary(self, old, update):
-        #config file parameter name, internal parameter name, data conversion function
+        # config file parameter name, internal parameter name, data conversion function
         translation_table = [
             ['fill_density', 'infill', self.percent_transform],
             ['brim_width', 'brim', self.brim_transform],
-            #['support_material', 'support', self.boolean_transform]
+            # ['support_material', 'support', self.boolean_transform]
             ['support_material', 'support_on_off', self.support1_transform],
             ['support_material_buildplate_only', 'support_build_plate', self.support2_transform],
             ['overhangs', 'overhangs', self.support3_transform],
             ['support_material_extruder', 'support_material_extruder', self.support4_transform],
             ['support_material_interface_extruder', 'support_material_interface_extruder', self.str_transform],
-            #['support_material_with_sheath', 'support_material_with_sheath', self.support5_transform],
+            # ['support_material_with_sheath', 'support_material_with_sheath', self.support5_transform],
 
             ['wipe_tower', 'is_wipe_tower', self.str_transform],
             ['wipe_tower_per_color_wipe', 'wipe_size_y', self.str_transform],
@@ -151,27 +148,27 @@ class Slic3rEngineRunner(QObject):
         return "%s" % str(in_value) + '%'
 
     def brim_transform(self, in_value):
-        return "%s" % str(int(in_value)*10)
+        return "%s" % str(int(in_value) * 10)
 
     def support1_transform(self, in_value):
         print("Support transform 1: " + str(in_value))
-        if in_value == 0:   #None
+        if in_value == 0:  # None
             return "0"
-        elif in_value >= 1: #Build plate only
+        elif in_value >= 1:  # Build plate only
             return "1"
         return "0"
 
     def support2_transform(self, in_value):
         print("Support transform 2: " + str(in_value))
-        if in_value == 0:   #None
+        if in_value == 0:  # None
             return "0"
-        elif in_value == 1: #Build plate only
+        elif in_value == 1:  # Build plate only
             return "1"
-        elif in_value == 2: #Everywhere
+        elif in_value == 2:  # Everywhere
             return "0"
-        elif in_value == 3: #Build plate only with interface
+        elif in_value == 3:  # Build plate only with interface
             return "1"
-        elif in_value == 4: #Everywhere with interface
+        elif in_value == 4:  # Everywhere with interface
             return "0"
         else:
             return "0"
@@ -179,9 +176,9 @@ class Slic3rEngineRunner(QObject):
 
     def support3_transform(self, in_value):
         print("Support transform 3: " + str(in_value))
-        if in_value == 0:   #None
+        if in_value == 0:  # None
             return "0"
-        elif in_value >= 1: #other support options
+        elif in_value >= 1:  # other support options
             return "1"
         else:
             return "1"
@@ -189,29 +186,29 @@ class Slic3rEngineRunner(QObject):
 
     def support4_transform(self, in_value):
         print("Support transform 4: " + str(in_value))
-        #support material extruder
+        # support material extruder
         [a, b] = in_value
-        if b == 0:   #None
+        if b == 0:  # None
             return "0"
-        elif b == 1: #Build plate only
+        elif b == 1:  # Build plate only
             return self.str_transform(a)
-        elif b == 2: #Everywhere
+        elif b == 2:  # Everywhere
             return self.str_transform(a)
-        elif b > 2: #Build plate only
+        elif b > 2:  # Build plate only
             return "0"
         return "0"
 
     def support5_transform(self, in_value):
         print("Support transform 4: " + str(in_value))
-        #support material extruder
+        # support material extruder
         [a, b] = in_value
-        if b == 0:   #None
+        if b == 0:  # None
             return "0"
-        elif b == 1: #Build plate only
+        elif b == 1:  # Build plate only
             return self.str_transform(a)
-        elif b == 2: #Everywhere
+        elif b == 2:  # Everywhere
             return self.str_transform(a)
-        elif b > 2: #Build plate only
+        elif b > 2:  # Build plate only
             return "0"
         return "0"
 
@@ -221,27 +218,26 @@ class Slic3rEngineRunner(QObject):
     def list_to_str(self, lst):
         return ','.join(str(e) for e in lst)
 
-
     def save_configuration(self, filename):
         actual_printing_data = self.controller.get_actual_printing_data()
         for i in actual_printing_data:
-            if i in ['brim', 'support_on_off'] and actual_printing_data[i]==True:
-                self.step_max+=1
+            if i in ['brim', 'support_on_off'] and actual_printing_data[i] == True:
+                self.step_max += 1
 
-        #material_printing_data = self.controller.get_printing_parameters_for_material_quality(actual_printing_data['material'], actual_printing_data['quality'])
+        # material_printing_data = self.controller.get_printing_parameters_for_material_quality(actual_printing_data['material'], actual_printing_data['quality'])
         material_printing_data = self.controller.printing_parameters.get_actual_settings(self.controller.get_actual_printer(), self.controller.settings['printer_type'], actual_printing_data['material'], actual_printing_data['quality'], self)
-        #print("All settings: " + str(material_printing_data))
+        # print("All settings: " + str(material_printing_data))
         new_parameters = self.translate_dictionary(material_printing_data, actual_printing_data)
         new_config = configparser.RawConfigParser()
         new_config.add_section('settings')
-        #new_config.set('settings', i, new_parameters)
+        # new_config.set('settings', i, new_parameters)
         for i in new_parameters:
             if type(new_parameters[i]) == list:
                 new_config.set('settings', i, self.list_to_str(new_parameters[i]))
             else:
                 new_config.set('settings', i, new_parameters[i])
 
-        #write ini file
+        # write ini file
         with open(filename, 'w') as ini_file:
             fake_file = io.StringIO()
             new_config.write(fake_file)
@@ -249,22 +245,21 @@ class Slic3rEngineRunner(QObject):
 
         print("saved")
 
-
     def slice(self):
         self.save_configuration(self.controller.app_config.tmp_place + 'prusacontrol.ini')
         self.process = subprocess.Popen(
-                    self.slicer_place + [self.controller.app_config.tmp_place + 'tmp.prusa', '--load',
-                                         self.controller.app_config.tmp_place + 'prusacontrol.ini', '--output',
-                                         self.controller.app_config.tmp_place + 'out.gcode', '--dont-arrange'],
-                    stdout=subprocess.PIPE)
+                self.slicer_place + [self.controller.app_config.tmp_place + 'tmp.prusa', '--load',
+                                     self.controller.app_config.tmp_place + 'prusacontrol.ini', '--output',
+                                     self.controller.app_config.tmp_place + 'out.gcode', '--dont-arrange'],
+                stdout=subprocess.PIPE)
 
-        #if self.controller.is_multimaterial() and not self.controller.is_single_material_mode():
+        # if self.controller.is_multimaterial() and not self.controller.is_single_material_mode():
         #    self.process = subprocess.Popen(
         #        self.slicer_place + [self.controller.app_config.tmp_place + 'tmp.prusa', '--load',
         #                             self.controller.app_config.tmp_place + 'prusacontrol.ini', '--output',
         #                             self.controller.app_config.tmp_place + 'out.gcode', '--dont-arrange'],
         #        stdout=subprocess.PIPE)
-        #else:
+        # else:
         #    self.process = subprocess.Popen(self.slicer_place + [self.controller.app_config.tmp_place + 'tmp.stl', '--load',
         #                            self.controller.app_config.tmp_place + 'prusacontrol.ini', '--output',
         #                            self.controller.app_config.tmp_place + 'out.gcode', '--dont-arrange'],
@@ -275,11 +270,11 @@ class Slic3rEngineRunner(QObject):
         self.process.kill()
 
     def check_progress(self):
-        #self.gcode.set_running_variable(self.is_running)
+        # self.gcode.set_running_variable(self.is_running)
         self.step = 16
-        step_coef = 40./(len(self.controller.scene.get_models(False))*7.)
+        step_coef = 40. / (len(self.controller.scene.get_models(False)) * 7.)
         while self.is_running is True:
-            self.step+=(1.*step_coef)
+            self.step += (1. * step_coef)
             if self.process.returncode == -signal.SIGSEGV:
                 self.send_message.emit("Slic3r engine crash")
                 break
@@ -302,7 +297,7 @@ class Slic3rEngineRunner(QObject):
                 filament_str = str(parsed_line[2] + ' ' + parsed_line[3])
                 self.filament_info.emit(filament_str)
                 self.finished.emit()
-                #self.step_increased.emit(100)
+                # self.step_increased.emit(100)
                 break
             else:
                 text = line.rsplit()[1:]
@@ -313,9 +308,8 @@ class Slic3rEngineRunner(QObject):
 
     def set_gcode_progressbar(self, value):
         start = 75
-        final = int(((value+0.001)/100.)*25.)
-        self.step_increased.emit(start+final)
-
+        final = int(((value + 0.001) / 100.) * 25.)
+        self.step_increased.emit(start + final)
 
     def end(self):
         self.end_callback()
@@ -325,12 +319,14 @@ class Slic3rEngineRunner(QObject):
         version_info = str(version_process.stdout.readline(), 'utf-8')
         return version_info
 
+
 class CuraEngine(SlicerEngineAbstract):
     '''
     This is just connector to console version of Slic3r software
     first version
     '''
     pass
+
 
 class OwnSlicerEngine(SlicerEngineAbstract):
     '''
@@ -352,10 +348,9 @@ class SlicerEngineManager(QObject):
         self.slice_thread = None
         self.slice_engine = Slic3rEngineRunner(self.controller)
 
-
     def slice(self):
         self.slice_thread = QThread()
-        #TODO:Make it universal(for other slice engines)
+        # TODO:Make it universal(for other slice engines)
         self.slice_engine = Slic3rEngineRunner(self.controller)
         self.slice_engine.moveToThread(self.slice_thread)
         self.slice_thread.started.connect(self.slice_engine.slice)
@@ -383,10 +378,8 @@ class SlicerEngineManager(QObject):
 
     def thread_ended(self):
         self.slice_thread.quit()
-        #TODO: add function to read gcode
+        # TODO: add function to read gcode
         self.controller.scene_was_sliced()
-
 
     def get_version(self):
         return self.slice_engine.get_version()
-

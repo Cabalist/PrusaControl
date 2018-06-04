@@ -1004,7 +1004,7 @@ class Controller(QObject):
 
         print("Printing on octoprint:")
         url = "http://" + self.default_printing_service + '/api/files/local'
-        print("Sending to %s" % (url))
+        print("Sending to %s" % url)
 
         with open(self.app_config.tmp_place + 'out.gcode') as fp:
             binary_data = fp.read()
@@ -1974,9 +1974,9 @@ class Controller(QObject):
                             new_scale = numpy.array([v, v, v])
                         else:
                             v = l / numpy.linalg.norm(new_size)
-                            new_scale = numpy.array([v * (self.original_scale)[0],
-                                                     v * (self.original_scale)[1],
-                                                     v * (self.original_scale)[2]])
+                            new_scale = numpy.array([v * self.original_scale[0],
+                                                     v * self.original_scale[1],
+                                                     v * self.original_scale[2]])
 
                         new_scale = numpy.abs(new_scale)
                         model.set_scale_abs(new_scale[0], new_scale[1], new_scale[2])

@@ -1359,7 +1359,7 @@ class GLWidget(QGLWidget):
         rayStart = gluUnProject(winX, winY, -1.0, matModelView, matProjection, viewport)
         rayEnd = gluUnProject(winX, winY, 1.0, matModelView, matProjection, viewport)
 
-        return (rayStart, rayEnd)
+        return rayStart, rayEnd
 
     def get_camera_direction(self, event=None):
         matModelView = glGetDoublev(GL_MODELVIEW_MATRIX)

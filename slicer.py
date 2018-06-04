@@ -14,7 +14,7 @@ from gcode import GCode
 __author__ = 'Tibor Vavra'
 
 
-class SlicerEngineAbstract():
+class SlicerEngineAbstract:
     '''
     SlicerEngineAbstract is abstract class patern for others SlicerEngines
     '''

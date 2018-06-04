@@ -937,7 +937,7 @@ class Model(object):
 
         self.texture_size = 16
         self.variable_texture_data = np.full((self.texture_size * self.texture_size * 4), 255, dtype=np.int)
-        self.variable_layer_height_data = np.zeros((11), dtype=np.float32)
+        self.variable_layer_height_data = np.zeros(11, dtype=np.float32)
 
         self.variable_texture = []
 
@@ -2016,7 +2016,7 @@ class MultiModel(Model):
         for m in self.models:
             m.update_min_max()
             # m.min_scene = m.min + self.pos
-            min_lst.append((m.min))
+            min_lst.append(m.min)
 
             # m.max_scene = m.max + self.pos
             max_lst.append(m.max)

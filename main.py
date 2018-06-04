@@ -44,14 +44,14 @@ class EventLoopRunner(QObject):
 
     def initializeGUI(self):
 
-        self.css = QFile(self.base_path + 'data/my_stylesheet.qss')
+        self.css = QFile(os.path.join(self.base_path, 'data', 'my_stylesheet.qss'))
         self.css.open(QIODevice.ReadOnly)
 
         if self.system_platform in ["Darwin"]:
-            self.splash_pix = QPixmap(self.base_path + 'data/img/splashscreen_osx.png')
+            self.splash_pix = QPixmap(os.path.join(self.base_path, 'data', 'img', 'splashscreen_osx.png'))
             self.progressbar_on = 0
         else:
-            self.splash_pix = QPixmap(self.base_path + 'data/img/splashscreen.png')
+            self.splash_pix = QPixmap(os.path.join(self.base_path, 'data', 'img', 'splashscreen.png'))
             self.progressbar_on = 1
         self.splash = QSplashScreen(self.splash_pix, Qt.SplashScreen | Qt.WindowStaysOnTopHint)
 
@@ -122,13 +122,11 @@ def main():
 
     dpi = app.desktop().logicalDpiX()
 
-    app.setWindowIcon(QIcon(base_dir + "data/icon/favicon.ico"))
+    app.setWindowIcon(QIcon(os.path.join(base_dir, "data', 'icon', 'favicon.ico")))
     if dpi == 96:
-        file = QFile(base_dir + "data/my_stylesheet.qss")
-    # elif dpi == 72:
-    #    file = QFile(base_dir + "data/my_stylesheet.qss")
+        file = QFile(os.path.join(base_dir, "data', 'my_stylesheet.qss"))
     else:
-        file = QFile(base_dir + "data/my_stylesheet_without_f.qss")
+        file = QFile(os.path.join(base_dir, "data', 'my_stylesheet_without_f.qss"))
     file.open(QFile.ReadOnly)
 
     StyleSheet_tmp = str(file.readAll(), 'utf-8')
@@ -160,19 +158,13 @@ def main():
 
 
 if __name__ == '__main__':
-    system_platform = platform.system()
-    log_path = "/"
-    if system_platform in ['Windows']:
-        log_path = "\\"
-    else:
-        log_path = "/"
     FORMAT = "[%(levelname)s][%(filename)s:%(lineno)s:%(funcName)s()]-%(message)s"
 
     if DEBUG:
-        logging.basicConfig(filename=os.path.expanduser("~" + log_path + "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.DEBUG)
+        logging.basicConfig(filename=os.path.join(os.path.expanduser("~"), "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.DEBUG)
         # cProfile.runctx('main()', globals(), locals(), 'prusacontrol.profile')
     else:
-        logging.basicConfig(filename=os.path.expanduser("~" + log_path + "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.WARNING)
+        logging.basicConfig(filename=os.path.join(os.path.expanduser("~"), "prusacontrol.log"), format=FORMAT, filemode='w', level=logging.WARNING)
 
     if DEBUG:
         cProfile.runctx('main()', globals(), locals(), 'prusacontrol.profile')

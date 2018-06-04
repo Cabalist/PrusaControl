@@ -1817,19 +1817,6 @@ class PrusaControlView(QMainWindow):
 
         return msgBox.exec_()
 
-    def show_cancel_generating_dialog_and_load_file(self):
-        msgBox = QMessageBox(self)
-        msgBox.setObjectName("msgBox")
-        msgBox.setWindowTitle(self.tr("Load file"))
-        msgBox.setText(self.tr("GCode file is in loading process."))
-        msgBox.setInformativeText(self.tr("Do you want to cancel loading of GCode file and load this file?"))
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msgBox.setDefaultButton(QMessageBox.No)
-        msgBox.button(msgBox.Yes).setText(self.tr("Yes"))
-        msgBox.button(msgBox.No).setText(self.tr("No"))
-
-        return msgBox.exec_()
-
     def show_clear_scene_and_load_gcode_file_dialog(self):
         msgBox = QMessageBox(self)
         msgBox.setObjectName("msgBox")

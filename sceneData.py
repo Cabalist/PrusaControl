@@ -1297,7 +1297,7 @@ class Model(object):
     def set_scale(self, value):
         printing_space = self.parent.controller.actual_printer['printing_space']
         new_size = np.dot(self.size_origin, self.scale_matrix * value)
-        if new_size[0] < printing_space[0] * 0.98 and new_size[1] < printing_space[1] * 0.98 and new_size[2] < printing_space[2] * 0.98 and new_size[0] > 0.5 and new_size[1] > 0.5 and new_size[2] > 0.5:
+        if 0.5 < new_size[0] < printing_space[0] * 0.98 and 0.5 < new_size[1] < printing_space[1] * 0.98 and 0.5 < new_size[2] < printing_space[2] * 0.98:
             self.temp_scale = np.array([[1., 0., 0.],
                                         [0., 1., 0.],
                                         [0., 0., 1.]]) * value

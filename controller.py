@@ -1070,7 +1070,7 @@ class Controller(QObject):
             suggest_filename += "_" + material_info.upper() + "_" + quality_name.upper()
 
         if self.is_multimaterial() and not self.is_single_material_mode():
-            suggest_filename = suggest_filename + "_MM"
+            suggest_filename += "_MM"
 
         return suggest_filename
 

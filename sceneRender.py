@@ -1372,7 +1372,7 @@ class GLWidget(QGLWidget):
         rayEnd = numpy.array(gluUnProject(winX, winY, 1.0, matModelView, matProjection, viewport))
 
         rayUp = numpy.array(gluUnProject(winX, winY + 10., 0.0, matModelView, matProjection, viewport))
-        rayUp = rayUp - rayStart
+        rayUp -= rayStart
         rayUp /= numpy.linalg.norm(rayUp)
         self.rayUp = rayUp
 

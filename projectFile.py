@@ -203,7 +203,7 @@ class Version_1_0(VersionAbstract):
 
             multipart_groups_sorted = []
             for g in multipart_groups:
-                multipart_groups_sorted = multipart_groups_sorted + sorted(multipart_groups[g], key=lambda model: model.filename)
+                multipart_groups_sorted += sorted(multipart_groups[g], key=lambda model: model.filename)
 
             models_from_scene_sorted = single_part_models + multipart_groups_sorted
 

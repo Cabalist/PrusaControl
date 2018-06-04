@@ -1216,7 +1216,7 @@ class Model(object):
         # vektor od nuly po boundingSphereCenter, tedy rozdil ktery je potreba pricist ke vsem souradnicim
         r = np.array([.0, .0, .0]) - np.array(self.boundingSphereCenter)
 
-        self.mesh.vectors = self.mesh.vectors + r
+        self.mesh.vectors += r
 
         self.mesh.update_min()
         self.mesh.update_max()

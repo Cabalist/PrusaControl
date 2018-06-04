@@ -1773,8 +1773,8 @@ class Model(object):
 
     # @timing
     def intersectionRayModel(self, rayStart, rayEnd):
-        ray = rayEnd - rayStart
-        ray /= np.linalg.norm(ray)
+        this_ray = rayEnd - rayStart
+        this_ray /= np.linalg.norm(this_ray)
 
         data = self.temp_mesh
 
@@ -1789,11 +1789,11 @@ class Model(object):
 
             n = self.temp_mesh.normals[counter]
 
-            q = np.cross(ray, e2)
+            q = np.cross(this_ray, e2)
             a = np.dot(e1, q)
 
             counter += 1
-            if (np.dot(n, ray) >= .0) or (abs(a) <= .0001):
+            if (np.dot(n, this_ray) >= .0) or (abs(a) <= .0001):
                 continue
 
             s = np.array(rayStart)
@@ -1802,7 +1802,7 @@ class Model(object):
 
             r = np.cross(s, e1)
             b[0] = np.dot(s, q)
-            b[1] = np.dot(r, ray)
+            b[1] = np.dot(r, this_ray)
             b[2] = 1.0 - b[0] - b[1]
 
             if (b[0] < .0) or (b[1] < .0) or (b[2] < .0):
@@ -1810,7 +1810,7 @@ class Model(object):
 
             t = np.dot(e2, r)
             if t >= .0:
-                point = rayStart + t * ray
+                point = rayStart + t * this_ray
                 return True, point
             else:
                 continue
@@ -1818,8 +1818,8 @@ class Model(object):
 
     # @timing
     def intersectionRayModel2(self, rayStart, rayEnd):
-        ray = rayEnd - rayStart
-        ray /= np.linalg.norm(ray)
+        this_ray = rayEnd - rayStart
+        this_ray /= np.linalg.norm(this_ray)
 
         # data = self.get_mesh(True, False, False)
         data = self.temp_mesh
@@ -1835,7 +1835,7 @@ class Model(object):
 
         n = data.normals
 
-        q = np.cross(ray, e2)
+        q = np.cross(this_ray, e2)
         a = np.dot(e1, q)
 
         counter = 0
@@ -1859,11 +1859,11 @@ class Model(object):
 
             n = self.temp_mesh.normals[counter]
 
-            q = np.cross(ray, e2)
+            q = np.cross(this_ray, e2)
             a = np.dot(e1, q)
 
             counter += 1
-            if (np.dot(n, ray) >= .0) or (abs(a) <= .0001):
+            if (np.dot(n, this_ray) >= .0) or (abs(a) <= .0001):
                 continue
 
             s = np.array(rayStart)
@@ -1872,7 +1872,7 @@ class Model(object):
 
             r = np.cross(s, e1)
             b[0] = np.dot(s, q)
-            b[1] = np.dot(r, ray)
+            b[1] = np.dot(r, this_ray)
             b[2] = 1.0 - b[0] - b[1]
 
             if (b[0] < .0) or (b[1] < .0) or (b[2] < .0):
@@ -1880,7 +1880,7 @@ class Model(object):
 
             t = np.dot(e2, r)
             if t >= .0:
-                point = rayStart + t * ray
+                point = rayStart + t * this_ray
                 return tri, point
             else:
                 continue
@@ -1888,8 +1888,8 @@ class Model(object):
 
     # @timing
     def intersectionRayModel3(self, rayStart, rayEnd):
-        ray = rayEnd - rayStart
-        ray /= np.linalg.norm(ray)
+        this_ray = rayEnd - rayStart
+        this_ray /= np.linalg.norm(this_ray)
 
         n = self.temp_mesh.normals
         vectors = self.temp_mesh.vectors + self.pos
@@ -1907,12 +1907,12 @@ class Model(object):
         e2 = tri_2
         e2 -= tri_0
 
-        q = np.cross(ray, e2)
+        q = np.cross(this_ray, e2)
         # a = np.dot(e1, q)
         a = np.einsum('ij,ij->i', e1, q)
         shape_tri = tri_0.shape
 
-        f1 = (np.dot(n, ray) >= .0) | (np.absolute(a) <= .0001)
+        f1 = (np.dot(n, this_ray) >= .0) | (np.absolute(a) <= .0001)
         # print("F1:" + str(f1))
         if not f1.any():
             print("Nic v F1")
@@ -1931,7 +1931,7 @@ class Model(object):
         b_0 = np.nan_to_num(np.einsum('ij,ij->i', s, q))
         # b[1] = np.dot(r, ray)
         # b_1 = np.einsum('ij,ij->i', r, ray)
-        b_1 = np.nan_to_num(np.dot(r, ray))
+        b_1 = np.nan_to_num(np.dot(r, this_ray))
         # b[2] = 1.0 - b[0] - b[1]
         b_2 = np.nan_to_num(1.0 - b_0 - b_1)
 
@@ -1951,7 +1951,7 @@ class Model(object):
         else:
             # t_fin = np.min(t[f_final])
             t_fin = t[f_final][0] * .001
-            point = rayStart + t_fin * ray
+            point = rayStart + t_fin * this_ray
             return True, point
 
     # TODO:Better!!!
@@ -2117,10 +2117,10 @@ class ModelTypeObj(ModelTypeAbstract):
         texcoords_array = []
         faces = []
 
-        for line in open(filename, "r"):
-            if line.startswith('#'):
+        for each_line in open(filename, "r"):
+            if each_line.startswith('#'):
                 continue
-            values = line.split()
+            values = each_line.split()
             if not values:
                 continue
             if values[0] == 'v':

@@ -439,7 +439,7 @@ class AppParameters(object):
                 materials_files_list = [printers_data['printers'][i]['material_parameters_file'] for i in
                                         printers_data['printers'] if i not in ['default']]
 
-            if materials_files_list == []:
+            if not materials_files_list:
                 logging.error("No internet connection or different network problem")
                 return
 

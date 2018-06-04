@@ -895,7 +895,7 @@ class Controller(QObject):
         self.update_scene()
 
     def check_compatible_with_lst(self, lst):
-        if lst == []:
+        if not lst:
             return list(self.get_printer_materials_names_ls(self.get_actual_printer()))
         else:
             return lst
@@ -1166,7 +1166,7 @@ class Controller(QObject):
     def open_project_file(self, url=None):
         if self.is_something_to_save():
             ret = self.view.open_project_asking_dialog()
-            if ret == False:
+            if not ret:
                 return
             elif ret == 'Open':
                 self.scene.clear_scene()
@@ -2125,7 +2125,7 @@ class Controller(QObject):
 
     def set_printable(self, is_printable):
         self.scene.printable = is_printable
-        if is_printable == False:
+        if not is_printable:
             # print("Disable genrate button")
             self.disable_generate_button()
         else:

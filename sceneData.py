@@ -164,7 +164,7 @@ class AppScene(object):
     def update_wipe_tower(self):
         # get maximal z in scene
         z_list = [self.get_size(m)[2] * 10. for m in self.get_models(with_wipe_tower=False)]
-        if z_list == []:
+        if not z_list:
             self.wipe_tower_size_z = 0.1
         else:
             max_z = max(z_list)
@@ -1685,7 +1685,7 @@ class Model(object):
         #    glDisableClientState(GL_TEXTURE_COORD_ARRAY)
         glDisableClientState(GL_NORMAL_ARRAY)
 
-        if self.is_in_printing_area == False:
+        if not self.is_in_printing_area:
             # font = self.parent.controller.view.font
             # font.setPointSize(35)
             glDisable(GL_LIGHTING)

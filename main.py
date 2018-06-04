@@ -74,7 +74,7 @@ class EventLoopRunner(QObject):
         self.set_progress(0)
 
     def process_event_loop(self):
-        while self.is_running == True:
+        while self.is_running:
             self.app.processEvents()
 
     def set_progress(self, value):

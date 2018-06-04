@@ -259,7 +259,7 @@ class GcodeParserRunner(QObject):
         line = 0
         line_number = 0
         while not in_stream.atEnd():
-            if self.is_running == False:
+            if not self.is_running:
                 return False
 
             if self.update_progressbar:

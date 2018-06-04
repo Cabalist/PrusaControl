@@ -122,11 +122,11 @@ def main():
 
     dpi = app.desktop().logicalDpiX()
 
-    app.setWindowIcon(QIcon(os.path.join(base_dir, "data', 'icon', 'favicon.ico")))
+    app.setWindowIcon(QIcon(os.path.join(base_dir, 'data', 'icon', 'favicon.ico')))
     if dpi == 96:
-        file = QFile(os.path.join(base_dir, "data', 'my_stylesheet.qss"))
+        file = QFile(os.path.join(base_dir, 'data', 'my_stylesheet.qs'))
     else:
-        file = QFile(os.path.join(base_dir, "data', 'my_stylesheet_without_f.qss"))
+        file = QFile(os.path.join(base_dir, 'data', 'my_stylesheet_without_f.qs'))
     file.open(QFile.ReadOnly)
 
     StyleSheet_tmp = str(file.readAll(), 'utf-8')

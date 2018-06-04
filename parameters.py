@@ -578,6 +578,5 @@ class AppParameters(object):
         except IndexError as e:
             return False
 
-
     def make_full_os_path(self, file):
         return os.path.expanduser(file)

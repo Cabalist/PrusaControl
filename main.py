@@ -137,7 +137,7 @@ def main():
     else:
         StyleSheet = StyleSheet_tmp.replace('base_dir', base_dir)
 
-    if not system_platform in ['Windows', 'Linux']:
+    if system_platform not in ['Windows', 'Linux']:
         app.setStyle(QStyleFactory.create("Windows"))
 
     app.setStyleSheet(StyleSheet)

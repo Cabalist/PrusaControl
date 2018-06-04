@@ -43,18 +43,18 @@ class MyListener(object):
         pass
         self.controller = controller
 
-    def remove_service(self, zeroconf, type, name):
+    def remove_service(self, zeroconf, type_, name):
         print("Service %s removed" % (name,))
         print("FIXME: Remove printer from dropdown menu here")
         # self.controlview.printerCombo.removeItem(???) # FIXME: Remove the correct one
         # Do we ever get remove_service notices when a printer is shut down?
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
+    def add_service(self, zeroconf, type_, name):
+        info = zeroconf.get_service_info(type_, name)
         print("Service %s added, service info: %s" % (name, info))
 
         # Try zeroconf cache first
-        info = ServiceInfo(type, name, properties={})
+        info = ServiceInfo(type_, name, properties={})
         for record in zeroconf.cache.entries_with_name(name.lower()):
             info.update_record(zeroconf, time.time(), record)
         for record in zeroconf.cache.entries_with_name(info.server):
@@ -63,7 +63,7 @@ class MyListener(object):
                 break
         # Request more data if info from cache is not complete
         if not info.address or not info.port:
-            info = zeroconf.get_service_info(type, name)
+            info = zeroconf.get_service_info(type_, name)
             if not info:
                 print("Could not get information about %s" % name)
                 return
@@ -540,9 +540,9 @@ class Controller(QObject):
         # self.view.variable_layer_widget.set_model(self.ac)
         self.update_scene()
 
-    def set_gcode_slider(self, min, max, min_l, max_l):
-        self.view.gcode_slider.setMinimum(min, min_l)
-        self.view.gcode_slider.setMaximum(max, max_l)
+    def set_gcode_slider(self, slider_min, slider_max, min_l, max_l):
+        self.view.gcode_slider.setMinimum(slider_min, min_l)
+        self.view.gcode_slider.setMaximum(slider_max, max_l)
 
     def set_gcode_instance(self, gcode_instance):
         self.gcode = gcode_instance
@@ -577,13 +577,13 @@ class Controller(QObject):
             return
         self.status = 'generated'
 
-        min = 0
-        max = len(self.gcode.data_keys) - 1
+        slider_min = 0
+        slicer_max = len(self.gcode.data_keys) - 1
 
         min_l = float(self.gcode.data_keys[0])
         max_l = float(self.gcode.data_keys[-1])
 
-        self.set_gcode_slider(min, max, min_l, max_l)
+        self.set_gcode_slider(slider_min, slicer_max, min_l, max_l)
 
         # What layer had to be show at start
         self.gcode_layer = self.gcode.data_keys[1]
@@ -617,8 +617,8 @@ class Controller(QObject):
 
     def check_rotation_helper(self, event):
         # print("check rotation")
-        id = self.get_id_under_cursor(event)
-        if self.is_some_tool_under_cursor(id):
+        id_ = self.get_id_under_cursor(event)
+        if self.is_some_tool_under_cursor(id_):
             self.view.update_scene()
 
     def unselect_tool_buttons(self):
@@ -723,26 +723,26 @@ class Controller(QObject):
     def get_printer_materials_labels_ls(self, printer_name):
         first_index = 0
         data = self.printing_parameters.get_materials_for_printer(printer_name)
-        list = [[data[material]['label'], data[material]["sort"], data[material]["first"]] for material in data]
-        list = sorted(list, key=lambda a: a[1])
-        for i, data in enumerate(list):
+        material_list = [[data[material]['label'], data[material]["sort"], data[material]["first"]] for material in data]
+        material_list = sorted(material_list, key=lambda a: a[1])
+        for i, data in enumerate(material_list):
             if data[2] == 1:
                 first_index = i
                 break
-        return [a[0] for a in list], first_index
+        return [a[0] for a in material_list], first_index
 
     def get_printer_material_quality_labels_ls_by_material_name(self, material_name):
         # return [self.printing_parameters.get_materials_quality_for_printer(self.actual_printer, material_name)['quality'][i]['label']
         #        for i in self.printing_parameters.get_materials_quality_for_printer(self.actual_printer, material_name)['quality']]
         first_index = 0
         data = self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material_name)['quality']
-        list = [[data[quality]['label'], data[quality]["sort"], data[quality]["first"]] for quality in data]
-        list = sorted(list, key=lambda a: a[1])
-        for i, data in enumerate(list):
+        quality_list = [[data[quality]['label'], data[quality]["sort"], data[quality]["first"]] for quality in data]
+        quality_list = sorted(quality_list, key=lambda a: a[1])
+        for i, data in enumerate(quality_list):
             if data[2] == 1:
                 first_index = i
                 break
-        return [a[0] for a in list], first_index
+        return [a[0] for a in quality_list], first_index
 
     def get_material_name_by_material_label(self, material_label):
         data = self.printing_parameters.get_materials_for_printer(self.get_actual_printer())
@@ -771,9 +771,9 @@ class Controller(QObject):
     def get_printer_material_quality_names_ls(self, material):
         # return [i['label'] for i in self.printing_settings['materials'][index]['quality'] if i['name'] not in ['default']]
         data = self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material)['quality']
-        list = [[quality, data[quality]["sort"]] for quality in data]
-        list = sorted(list, key=lambda a: a[1])
-        return [a[0] for a in list]
+        quality_list = [[quality, data[quality]["sort"]] for quality in data]
+        quality_list = sorted(quality_list, key=lambda a: a[1])
+        return [a[0] for a in quality_list]
         # return [i for i in self.printing_parameters.get_materials_quality_for_printer(self.get_actual_printer(), material)['quality']]
 
     def get_printing_settings_for_material_in_extruder(self, extruder_number):
@@ -884,7 +884,7 @@ class Controller(QObject):
                 compatible_materials = [mat for o, mat in enumerate(filtrated_compatible_lst) if not i == o]
                 # print("Compatible materials: " + str(compatible_materials))
                 for compat_mat in compatible_materials:
-                    if not material in compat_mat:
+                    if material not in compat_mat:
                         # print("Nekompatibilni")
                         show_warning = True
 
@@ -1793,7 +1793,6 @@ class Controller(QObject):
                         self.select_object(object_id)
                     '''
 
-
             else:
                 # print("Jiny status nez model_view")
                 self.unselect_objects()
@@ -1829,7 +1828,6 @@ class Controller(QObject):
                     self.old_angle = model.rot[2]
             # self.view.glWidget.oldHitPoint = numpy.array([0., 0., 0.])
             # self.view.glWidget.hitPoint = numpy.array([0., 0., 0.])
-
 
         elif self.tool == 'placeonface':
             # print("inside placeonface")
@@ -2186,8 +2184,8 @@ class Controller(QObject):
         return False
 
     def reset_transformation_on_object(self, object_id):
-        object = self.get_object_by_id(object_id)
-        object.reset_transformation()
+        obj = self.get_object_by_id(object_id)
+        obj.reset_transformation()
 
     #    @timing
     def get_id_under_cursor(self, event):
@@ -2350,7 +2348,7 @@ class Controller(QObject):
             return False
 
     def get_url_from_local_fileid(self, localFileID):
-        if not self.app_config.system_platform in ["Darwin"]:
+        if self.app_config.system_platform not in ["Darwin"]:
             return ""
         else:
             import objc

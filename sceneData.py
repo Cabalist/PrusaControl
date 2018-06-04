@@ -96,7 +96,7 @@ class AppScene(object):
         size_z = self.wipe_tower_size_z
 
         # Define the 8 vertices of the cube
-        vertices = np.array([ \
+        vertices = np.array([
             [-1. * (size_x * .5), -1. * (size_y * .5), -1. * (size_z * .5)],
             [1. * (size_x * .5), -1. * (size_y * .5), -1. * (size_z * .5)],
             [1. * (size_x * .5), 1. * (size_y * .5), -1. * (size_z * .5)],
@@ -107,7 +107,7 @@ class AppScene(object):
             [-1. * (size_x * .5), 1. * (size_y * .5), 1. * (size_z * .5)]])
 
         # Define the 12 triangles composing the cube
-        faces = np.array([ \
+        faces = np.array([
             [0, 3, 1],
             [1, 3, 2],
             [0, 4, 7],
@@ -357,21 +357,21 @@ class AppScene(object):
         m = Mesh(np.concatenate([m.get_mesh(False, False, False).data for m in models_lst]))
         m.update_max()
         m.update_min()
-        min = m.min_
-        max = m.max_
+        mesh_min = m.min_
+        mesh_max = m.max_
 
         data = m.get_mass_properties()
-        bounding_center = np.array([((max[0] - min[0]) * .5), ((max[1] - min[1]) * .5), ((max[2] - min[2]) * .5)])
+        bounding_center = np.array([((mesh_max[0] - mesh_min[0]) * .5), ((mesh_max[1] - mesh_min[1]) * .5), ((mesh_max[2] - mesh_min[2]) * .5)])
         r = np.array([.0, .0, .0]) - data[1]
 
         m.vectors = m.vectors + r
 
         m.update_max()
         m.update_min()
-        min = np.array(m.min_)
-        max = np.array(m.max_)
+        mesh_min = np.array(m.min_)
+        mesh_max = np.array(m.max_)
 
-        size = max - min
+        size = mesh_max - mesh_min
         size_origin = deepcopy(size)
 
         max_l = np.linalg.norm(m.max_)
@@ -382,11 +382,11 @@ class AppScene(object):
 
         max_bs = []
 
-        models_lst[0].multipart_parent.min = min
-        models_lst[0].multipart_parent.max = max
+        models_lst[0].multipart_parent.min = mesh_min
+        models_lst[0].multipart_parent.max = mesh_max
 
         models_lst[0].multipart_parent.pos = np.array([0., 0., 0.])
-        models_lst[0].multipart_parent.pos[2] -= min[2]
+        models_lst[0].multipart_parent.pos[2] -= mesh_min[2]
 
         if max_l > min_l:
             models_lst[0].multipart_parent.boundingSphereSize = max_l
@@ -407,8 +407,8 @@ class AppScene(object):
             # obj.pos = np.array([.0, .0, .0]) - obj.zeroPoint
             # obj.zeroPoint += r
 
-            obj.min = deepcopy(min)
-            obj.max = deepcopy(max)
+            obj.min = deepcopy(mesh_min)
+            obj.max = deepcopy(mesh_max)
 
             max_bs.append(obj.max_bs)
 
@@ -716,11 +716,11 @@ class AppScene(object):
 
             all_pos = np.array([m.multipart_parent.pos for m in self.get_models(with_wipe_tower)])
 
-            min = np.min(all_pos, axis=0)
-            max = np.max(all_pos, axis=0)
+            pos_min = np.min(all_pos, axis=0)
+            pos_mx = np.max(all_pos, axis=0)
 
-            x_center = (max[0] - min[0]) * .5
-            y_center = (max[1] - min[1]) * .5
+            x_center = (pos_mx[0] - pos_min[0]) * .5
+            y_center = (pos_mx[1] - pos_min[1]) * .5
 
             placed_groups = []
 
@@ -748,11 +748,11 @@ class AppScene(object):
 
             all_pos = np.array([deepcopy(m.pos) for m in self.get_models(with_wipe_tower=with_wipe_tower)])
 
-            min = np.min(all_pos, axis=0)
-            max = np.max(all_pos, axis=0)
+            pos_min = np.min(all_pos, axis=0)
+            pos_mx = np.max(all_pos, axis=0)
 
-            x_center = (max[0] - min[0]) * .5
-            y_center = (max[1] - min[1]) * .5
+            x_center = (pos_mx[0] - pos_min[0]) * .5
+            y_center = (pos_mx[1] - pos_min[1]) * .5
 
             for m in self.get_models(with_wipe_tower=with_wipe_tower):
                 m.pos[0] -= x_center
@@ -1102,7 +1102,7 @@ class Model(object):
 
     def calculate_normal_groups(self):
         actual_id = 0
-        id = 0
+        id_ = 0
 
         # d = defaultdict(int)
 
@@ -1113,7 +1113,7 @@ class Model(object):
 
         for normal in self.mesh.normals:
             if Vect(self.str_c(normal[0]), self.str_c(normal[1]), self.str_c(normal[2])) in d:
-                id = d[Vect(self.str_c(normal[0]), self.str_c(normal[1]), self.str_c(normal[2]))]
+                id_ = d[Vect(self.str_c(normal[0]), self.str_c(normal[1]), self.str_c(normal[2]))]
             else:
                 d[Vect(self.str_c(normal[0]), self.str_c(normal[1]), self.str_c(normal[2]))] = actual_id
                 actual_id += 1
@@ -1141,15 +1141,15 @@ class Model(object):
 
     def is_in_printing_space(self, printer):
         if self.is_multipart_model:
-            min = deepcopy(self.multipart_parent.min_scene)
-            max = deepcopy(self.multipart_parent.max_scene)
+            min_scene = deepcopy(self.multipart_parent.min_scene)
+            max_scene = deepcopy(self.multipart_parent.max_scene)
         else:
-            min = deepcopy(self.min_scene)
-            max = deepcopy(self.max_scene)
+            min_scene = deepcopy(self.min_scene)
+            max_scene = deepcopy(self.max_scene)
 
-        if max[0] <= (printer['printing_space'][0] * .05) and min[0] >= (printer['printing_space'][0] * -.05):
-            if max[1] <= (printer['printing_space'][1] * .05) and min[1] >= (printer['printing_space'][1] * -.05):
-                if max[2] <= printer['printing_space'][2] * 0.1 and min[2] >= -0.1:
+        if max_scene[0] <= (printer['printing_space'][0] * .05) and min_scene[0] >= (printer['printing_space'][0] * -.05):
+            if max_scene[1] <= (printer['printing_space'][1] * .05) and min_scene[1] >= (printer['printing_space'][1] * -.05):
+                if max_scene[2] <= printer['printing_space'][2] * 0.1 and min_scene[2] >= -0.1:
                     # print("Printing space[2] " + str(printer['printing_space'][2]))
                     self.is_in_printing_area = True
                     return True
@@ -1307,16 +1307,16 @@ class Model(object):
         return self.max_scene[2]
 
     def place_on_zero(self):
-        min = self.min_scene
-        max = self.max_scene
+        min_scene = self.min_scene
+        max_scene = self.max_scene
         pos = self.pos
 
-        if min[2] < 0.0:
-            diff = min[2] * -1.0
+        if min_scene[2] < 0.0:
+            diff = min_scene[2] * -1.0
             pos[2] += diff
             self.pos = pos
-        elif min[2] > 0.0:
-            diff = min[2] * -1.0
+        elif min_scene[2] > 0.0:
+            diff = min_scene[2] * -1.0
             pos[2] += diff
             self.pos = pos
 
@@ -1397,8 +1397,8 @@ class Model(object):
     def update_position(self):
         self.update_min_max()
         if self.min[2] < 0.:
-            len = self.min[2] * -1.0
-            self.pos[2] += len
+            pos_len = self.min[2] * -1.0
+            self.pos[2] += pos_len
             self.update_min_max()
 
     # @timing
@@ -1756,16 +1756,16 @@ class Model(object):
 
     def intersection_model_model_by_BB(self, model):
         # intersection by collision of BB
-        min = self.min_scene
-        max = self.max_scene
+        min_scene = self.min_scene
+        max_scene = self.max_scene
         model_min = model.min_scene
         model_max = model.max_scene
         d = self.parent.model_position_offset
         # print("intersection model model: " + str(d))
-        return not (max[0] + d < model_min[0] or model_max[0] < min[0] - d or max[1] + d < model_min[1] or model_max[1] < min[1] - d)
+        return not (max_scene[0] + d < model_min[0] or model_max[0] < min_scene[0] - d or max_scene[1] + d < model_min[1] or model_max[1] < min_scene[1] - d)
 
-    def intersection_model_list_model_(self, list):
-        for m in list:
+    def intersection_model_list_model_(self, model_list):
+        for m in model_list:
             if m.isVisible:
                 if self.intersection_model_model_by_BB(m):
                     return True
@@ -2067,18 +2067,18 @@ class MultiModel(Model):
         # TODO:bug with place on zero
         # self.update_min_max()
 
-        min = self.min_scene
-        max = self.max_scene
+        min_scene = self.min_scene
+        max_scene = self.max_scene
 
         pos = deepcopy(self.pos)
 
-        if min[2] < 0.0:
-            diff = min[2] * -1.0
+        if min_scene[2] < 0.0:
+            diff = min_scene[2] * -1.0
             print("Mensi nez 0.0: " + str(diff))
             pos[2] += diff
             self.pos = pos
-        elif min[2] > 0.0:
-            diff = min[2] * -1.0
+        elif min_scene[2] > 0.0:
+            diff = min_scene[2] * -1.0
             print("Vetsi nez 0.0: " + str(diff))
             pos[2] += diff
             self.pos = pos

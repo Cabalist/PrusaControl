@@ -90,9 +90,9 @@ class Version_1_0(VersionAbstract):
                 model_data = {}
                 model_data['file_name'] = model.get('name')
 
-                if not model.find('extruder') == None:
+                if not model.find('extruder') is None:
                     model_data['extruder'] = ast.literal_eval(model.find('extruder').text)
-                if not model.find('group') == None:
+                if not model.find('group') is None:
                     model_data['group'] = ast.literal_eval(model.find('group').text)
 
                 model_data['normalization'] = ast.literal_eval(model.find('normalization').text)

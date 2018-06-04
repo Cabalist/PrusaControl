@@ -325,7 +325,7 @@ class Controller(QObject):
         if self.is_multimaterial():
             return self.single_material_mode
         else:
-            True
+            return True
 
     def set_analyze_result_messages(self, result):
         self.analyze_result = result

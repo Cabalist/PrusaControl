@@ -44,10 +44,10 @@ def timing(f):
 
 
 class AppScene(object):
-    '''
+    """
     Class holding data of scene, models, positions, parameters
     it can be used for generating sliced data and rendering data
-    '''
+    """
 
     def __init__(self, controller):
         self.controller = controller
@@ -863,9 +863,9 @@ class AppScene(object):
 
 
 class Model(object):
-    '''
+    """
     this is reprezentation of model data
-    '''
+    """
     newid = itertools.count(1)
 
     def __init__(self):
@@ -1985,9 +1985,9 @@ class Model(object):
 
 # TODO:####
 class MultiModel(Model):
-    '''
+    """
     this is class for object constructed from more models(mainly for multimaterial printing)
-    '''
+    """
     group_id_counter = itertools.count(1)
 
     def __init__(self, models_lst, parent):
@@ -2089,9 +2089,9 @@ class MultiModel(Model):
 
 
 class ModelTypeAbstract(object):
-    '''
+    """
     model type is abstract class, reprezenting reading of specific model data file
-    '''
+    """
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -2187,9 +2187,9 @@ class ModelTypeObj(ModelTypeAbstract):
 
 
 class ModelTypeStl(ModelTypeAbstract):
-    '''
+    """
     Concrete ModelType class for STL type file, it can load binary and char file
-    '''
+    """
 
     @staticmethod
     def load(filename, normalize=True):

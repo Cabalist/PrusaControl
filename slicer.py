@@ -15,9 +15,9 @@ __author__ = 'Tibor Vavra'
 
 
 class SlicerEngineAbstract:
-    '''
+    """
     SlicerEngineAbstract is abstract class patern for others SlicerEngines
-    '''
+    """
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -34,10 +34,10 @@ class SlicerEngineAbstract:
 
 
 class Slic3rEngineRunner(QObject):
-    '''
+    """
     This is just connector to console version of Slic3r software
     first version
-    '''
+    """
     step_increased = pyqtSignal(int)
     filament_info = pyqtSignal(str)
     finished = pyqtSignal()
@@ -321,25 +321,25 @@ class Slic3rEngineRunner(QObject):
 
 
 class CuraEngine(SlicerEngineAbstract):
-    '''
+    """
     This is just connector to console version of Slic3r software
     first version
-    '''
+    """
     pass
 
 
 class OwnSlicerEngine(SlicerEngineAbstract):
-    '''
+    """
     PrusaResearch slicer engine, designed for their printers
     Future
-    '''
+    """
     pass
 
 
 class SlicerEngineManager(QObject):
-    '''
+    """
     SlicerEngineManager is class designed for managing slicers engine and prepare parameters
-    '''
+    """
     cancel_signal = pyqtSignal()
 
     def __init__(self, controller):

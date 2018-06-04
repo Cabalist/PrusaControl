@@ -1677,9 +1677,9 @@ class GLWidget(QGLWidget):
 
 
 def _gl_vector(array, *args):
-    '''
+    """
     Convert an array and an optional set of args into a flat vector of GLfloat
-    '''
+    """
     array = numpy.array(array)
     if len(args) > 0:
         array = numpy.append(array, args)

@@ -2431,9 +2431,9 @@ class Controller(QObject):
         pass
 
     def open_file(self, url):
-        '''
+        """
         function for resolve which file type will be loaded
-        '''
+        """
         # print("Urls type: " + str(type(url)))
 
         if self.status in ['generating']:

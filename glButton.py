@@ -7,7 +7,13 @@ __author__ = 'Tibor Vavra'
 class GlButton(object):
     newid = itertools.count(1)
 
-    def __init__(self, texture_off=None, texture_on=None, texture_hover=None, texture_background=None, size=[10., 10.], position=[0.0, 0.0], auto_release=False, tool_tip='', tool_name='', dpi_coef=1.0):
+    def __init__(self, texture_off=None, texture_on=None, texture_hover=None, texture_background=None, size=None, position=None, auto_release=False, tool_tip='', tool_name='', dpi_coef=1.0):
+        if size is None:
+            size = [10., 10.]
+
+        if position is None:
+            position = [0.0, 0.0]
+
         self.id = next(self.newid) * 7013
         self.color_id = [(self.id & 0x000000FF) >> 0, (self.id & 0x0000FF00) >> 8, (self.id & 0x00FF0000) >> 16]
 

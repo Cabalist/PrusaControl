@@ -998,7 +998,10 @@ class Model(object):
 
         # self.recalculate_texture()
 
-    def __deepcopy__(self, memodict={}):
+    def __deepcopy__(self, memodict=None):
+        if memodict is None:
+            memodict = {}
+
         m = Model()
 
         m.filename = deepcopy(self.filename)
